@@ -97,7 +97,7 @@ int main()
   SDL_Surface *img;
 
   init_sdl();
-  img = load_image("/home/pierre/Downloads/sushi-shop.jpg");
+  img = load_image("test_images/abs1.jpg"); //Remo// Changed location to test
   change_Image(img);
   display_image(img); 
 }
