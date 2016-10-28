@@ -5,6 +5,8 @@
 
 # include "pixel_operations.h"
 
+# include "image_blocking.h"
+
 
 void wait_for_keypressed(void) {
   SDL_Event             event;
@@ -97,7 +99,8 @@ int main()
   SDL_Surface *img;
 
   init_sdl();
-  img = load_image("/home/pierre/Downloads/sushi-shop.jpg");
+  img = load_image("/home/pierre/Downloads/text_test_2.jpg");
   change_Image(img);
-  display_image(img); 
+  img = single_image_blocking(img, 0);
+  display_image(img);
 }
