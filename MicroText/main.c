@@ -53,6 +53,7 @@ SDL_Surface* display_image(SDL_Surface *img) {
          img->w, img->h, SDL_GetError());
   }
  
+  SDL_UnlockSurface(img);
   /* Blit onto the screen surface */
   if(SDL_BlitSurface(img, NULL, screen, NULL) < 0)
     warnx("BlitSurface error: %s\n", SDL_GetError());
@@ -94,13 +95,18 @@ void change_Image(SDL_Surface *img){
   }
 }
 
-int main()
+int main(int argc, char **argv)
 {
+  argc = 2;
   SDL_Surface *img;
+  /*Img_array line;
+  Img_array cha;*/
 
   init_sdl();
-  img = load_image("/home/pierre/Downloads/text_test_2.jpg");
+  img = load_image(argv[1]);
   change_Image(img);
-  img = single_image_blocking(img, 0);
-  display_image(img);
+  /*line = line_image_blocking(img);
+  cha = column_image_blocking(line, 0);*/
+  display_image(img/*cha.array[0]*/);
+  SDL_SaveBMP(img, "result");
 }
