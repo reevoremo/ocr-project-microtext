@@ -103,7 +103,11 @@ int main(int argc, char **argv)
   Img_array cha;*/
 
   init_sdl();
+<<<<<<< HEAD
   img = load_image(argv[1]);
+=======
+  img = load_image("test_images/test1.bmp");
+>>>>>>> 895b739f3b780790e60e32ec524cf7cb6fd338ca
   change_Image(img);
   /*line = line_image_blocking(img);
   cha = column_image_blocking(line, 0);*/
