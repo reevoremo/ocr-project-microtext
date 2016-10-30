@@ -99,7 +99,7 @@ int main()
   SDL_Surface *img;
 
   init_sdl();
-  img = load_image("/home/pierre/Downloads/text_test_2.jpg");
+  img = load_image("test_images/test1.bmp");
   change_Image(img);
   img = single_image_blocking(img, 0);
   display_image(img);
