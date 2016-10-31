@@ -7,12 +7,15 @@
 
 # include "image_blocking.h"
 
+//This function puts every possible character in an array of type Img_array
 Img_array image_blocking(SDL_Surface *image)
 {
   Img_array lines = line_image_blocking(image);
   return column_image_blocking(lines);
 }
 
+//This function will split the image into lines where some characters might be
+//We check this by seeing if the line contains only pixels from the same color
 Img_array line_image_blocking(SDL_Surface *image)
 {
   
@@ -47,6 +50,7 @@ Img_array line_image_blocking(SDL_Surface *image)
   return lines;
 }
 
+//Same as line_image_blocking but with columns
 Img_array column_image_blocking(Img_array lines)
 {
   Img_array chars;
@@ -84,55 +88,7 @@ Img_array column_image_blocking(Img_array lines)
   return chars;
 }
 
-/*SDL_Surface** single_image_blocking(SDL_Surface *image, int line)
-{
-  SDL_Surface *result;
-  SDL_Surface *character;
-  static SDL_Surface *array[100];
-  character = SDL_CreateRGBSurface(0, image->w, image->h, 32, 0, 0, 0, 0);
-  result = SDL_CreateRGBSurface(0, image->w, image->h, 32, 0, 0, 0, 0);
-
-  int pos = 0;
-  for (; line < image->h; line++)
-  {
-    if (is_full_line(image, line) == 0)
-    {
-      int start = line;
-      for (; line < image->h; line++)
-      {
-        if (is_full_line(image, line) == 1)
-        {
-          SDL_Rect rect = {0, start, image->w, line - start};
-          
-          SDL_BlitSurface(image, &rect, result, NULL);
-          break;
-        }
-      }
-      break;
-    }
-  }
-  for (int i = 0; i < image -> w; i++)
-  {
-    if (is_full_column(result, i) == 0)
-    {
-      int start = i;
-      for (; i < image->w; i++)
-      {
-        if (is_full_column(result, i) == 1)
-        {
-          SDL_Rect rect = {start, 0, i - start, image->h};
-          SDL_BlitSurface(result, &rect, character, NULL);
-          break;
-        }
-      }
-      array[pos] = character;
-      pos++;
-      character = SDL_CreateRGBSurface(0, image->w, image->h, 32, 0, 0, 0, 0);
-    }
-  }
-  return array;
-}*/
-
+//This function checks if a line contains only pixels of the same color
 int is_full_line(SDL_Surface *image, int line)
 {
   Uint32 color = getpixel(image, 0, line);
@@ -144,6 +100,7 @@ int is_full_line(SDL_Surface *image, int line)
   return 1;
 }
 
+//Same as is_full_line but with columns
 int is_full_column(SDL_Surface *image, int column)
 {
   Uint32 color = getpixel(image, column, 0);
@@ -156,7 +113,7 @@ int is_full_column(SDL_Surface *image, int column)
 }
 
 
-
+//This function initializes an Img_array (array of SDL_Surface *)
 void init_array(Img_array *a, size_t init_size)
 {
   a->array = (SDL_Surface **)malloc(init_size * sizeof(SDL_Surface *));
@@ -164,6 +121,7 @@ void init_array(Img_array *a, size_t init_size)
   a->size = init_size;
 }
 
+//This function insert a SDL_Surface * into an Img_array
 void insert_array(Img_array *a, SDL_Surface *element)
 {
   if (a->used == a->size)
@@ -174,33 +132,10 @@ void insert_array(Img_array *a, SDL_Surface *element)
   a->array[a->used++] = element;
 }
 
+//This function removes an array
 void free_array(Img_array *a)
 {
   free(a->array);
   a->array = NULL;
   a->used = a->size = 0;
 }
-
-/*void char_init_array(Char_array *a, size_t init_size)
-{
-  a->array = (Img_array *)malloc(init_size * sizeof(Img_array));
-  a->used = 0;
-  a->size = init_size;
-}
-
-void char_insert_array(Char_array *a, Img_array element)
-{
-  if (a->used == a->size)
-  {
-    a->size *= 2;
-    a->array = (Img_array *)realloc(a->array, a->size * sizeof(Img_array));
-  }
-  a->array[a->used++] = element;
-}
-
-void char_free_array(Char_array *a)
-{
-  free(a->array);
-  a->array = NULL;
-  a->used = a->size = 0;
-}*/

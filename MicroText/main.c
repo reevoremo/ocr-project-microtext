@@ -115,6 +115,7 @@ int main(int argc, char **argv)
   
 }
 
+//This function save every single possible character of the image in a folder
 void save_characters(Img_array characters, char *file_name)
 {
   char dir[1024];
@@ -135,6 +136,7 @@ void save_characters(Img_array characters, char *file_name)
   }
 }
 
+//This function concatenates two strings
 char* concat(const char *s1, const char *s2)
 {
   char *result = malloc(strlen(s1) + strlen(s2) + 1);
