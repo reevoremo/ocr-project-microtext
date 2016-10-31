@@ -9,7 +9,8 @@
 
 Img_array image_blocking(SDL_Surface *image)
 {
-  return column_image_blocking(line_image_blocking(image), 0);
+  Img_array lines = line_image_blocking(image);
+  return column_image_blocking(lines);
 }
 
 Img_array line_image_blocking(SDL_Surface *image)
@@ -18,7 +19,7 @@ Img_array line_image_blocking(SDL_Surface *image)
   Img_array lines;
 
   //result = SDL_CreateRGBSurface(0, image->w, image->h, 32, 0, 0, 0, 0);
-  init_array(&lines, 5);
+  init_array(&lines, 2);
   for (int i = 0; i < image->h; i++)
   {
     if (is_full_line(image, i) == 0)
@@ -30,7 +31,7 @@ Img_array line_image_blocking(SDL_Surface *image)
         {
           SDL_Surface *result;
 
-          result = SDL_CreateRGBSurface(0, image->w, image->h, 32, 0, 0, 0, 0);
+          result = SDL_CreateRGBSurface(0, image->w, i - start, 32, 0, 0, 0, 0);
           SDL_Rect rect = {0, start, image->w, i - start};
 
           SDL_UnlockSurface(result);
@@ -46,39 +47,39 @@ Img_array line_image_blocking(SDL_Surface *image)
   return lines;
 }
 
-Img_array column_image_blocking(Img_array lines, size_t line_nb)
+Img_array column_image_blocking(Img_array lines)
 {
   Img_array chars;
 
   init_array(&chars, 5);
 
-  //for (size_t line_nb = 0; line_nb < 1/*lines.size*/; line_nb++)
-  //{
-   SDL_Surface *img = lines.array[line_nb];
-   for (int i = 0; i < img->w; i++)
-   {
-     if (is_full_column(img, i) == 0)
-     {
-       int start = i;
-       for (; i < img->w; i++)
-       {
-         if (is_full_column(img, i) == 1)
-         {
-           SDL_Surface *result;
+  for (size_t line = 0; line < lines.used; line++)
+  {
+    SDL_Surface *img = lines.array[line];
+    for (int i = 0; i < img->w; i++)
+    {
+      if (is_full_column(img, i) == 0)
+      {
+        int start = i;
+        for (; i < img->w; i++)
+        {
+          if (is_full_column(img, i) == 1)
+          {
+            SDL_Surface *result;
 
-           result = SDL_CreateRGBSurface(0, img->w, img->h, 32, 0, 0, 0, 0);
-           SDL_Rect rect = {start, 0, i - start, img->h};
+            result = SDL_CreateRGBSurface(0, i - start, img->h, 32, 0, 0, 0, 0);
+            SDL_Rect rect = {start, 0, i - start, img->h};
 
-           SDL_UnlockSurface(result);
+            SDL_UnlockSurface(result);
 
-           SDL_BlitSurface(img, &rect, result, NULL);
-           insert_array(&chars, result);
-           break;
-         }
+            SDL_BlitSurface(img, &rect, result, NULL);
+            insert_array(&chars, result);
+            break;
+          }
+        }
+          //break;
       }
-      //break;
     }
-    //}
   }
   return chars;
 }

@@ -2,11 +2,15 @@
 # include <SDL/SDL_image.h>
 # include <stdlib.h>
 # include <err.h>
+# include <unistd.h>
+# include <sys/stat.h>
+# include <sys/types.h>
 
 # include "pixel_operations.h"
 
 # include "image_blocking.h"
 
+# include "main.h"
 
 void wait_for_keypressed(void) {
   SDL_Event             event;
@@ -97,16 +101,44 @@ void change_Image(SDL_Surface *img){
 
 int main(int argc, char **argv)
 {
-  argc = 2;
+  argc = 3;
   SDL_Surface *img;
-  /*Img_array line;
-  Img_array cha;*/
+  //Img_array line;
+  Img_array cha;
 
   init_sdl();
-  img = load_image(argv[1]);
+  img = load_image(concat(argv[1], concat("/", argv[2])));
   change_Image(img);
-  /*line = line_image_blocking(img);
-  cha = column_image_blocking(line, 0);*/
-  display_image(img/*cha.array[0]*/);
-  SDL_SaveBMP(img, "result");
+  cha = image_blocking(img);
+  save_characters(cha, argv[2]);
+  display_image(img);
+  
+}
+
+void save_characters(Img_array characters, char *file_name)
+{
+  char dir[1024];
+  getcwd(dir, sizeof(dir));
+
+  struct stat st;
+  if (stat(concat(concat(dir, "/"), file_name), &st) == -1)
+  {
+    mkdir(concat(concat(dir, "/"), file_name), 0700);
+  }
+
+  for (size_t i = 0; i < characters.used; i++)
+  {
+    int index = i;
+    char num[3];
+    sprintf(num, "%d", index);
+    SDL_SaveBMP(characters.array[i], concat(concat(concat(concat(dir, "/"), file_name), "/"), num));
+  }
+}
+
+char* concat(const char *s1, const char *s2)
+{
+  char *result = malloc(strlen(s1) + strlen(s2) + 1);
+  strcpy(result, s1);
+  strcat(result, s2);
+  return result;
 }

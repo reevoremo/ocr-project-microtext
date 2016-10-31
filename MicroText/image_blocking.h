@@ -20,7 +20,7 @@ Img_array image_blocking(SDL_Surface *image);
 
 Img_array line_image_blocking(SDL_Surface *image);
 
-Img_array column_image_blocking(Img_array lines, size_t line_nb);
+Img_array column_image_blocking(Img_array lines);
 
 int is_full_line(SDL_Surface *image, int line);
 
