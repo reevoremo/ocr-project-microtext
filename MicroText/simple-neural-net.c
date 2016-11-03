@@ -24,7 +24,7 @@ int main()
 	float outputs[NUM_TRAINING][NUM_OUTPUTS] = {{0},{1},{1},{0}};
 
 	float learningrate = 0.03;
-	int iterations = 1000;
+	int iterations = 1250;
 	
 	//Doctors TUTO
 	//float rms = 0.0;
@@ -62,22 +62,17 @@ int main()
 	float loss, sum; //for storing the loss
 
 	//Training Loop
-for (t=0; t<iterations; t++) 
-{ //this is how many times we will train the network
+ t = 0;
+
+while ( t<iterations) 
+{
+	
+	 //this is how many times we will train the network
 	x[0]=1; 
 	memcpy (&x[1], inputs[t % NUM_TRAINING], sizeof (inputs[0])); //copy the input into x with the bias=1
 	// &x[1] send as ref
-	memcpy (y, outputs[t % NUM_TRAINING], sizeof (outputs[0])); //copy the output into y	
-	
-	
-	if (DEBUG){
-	printf("%s%d%s", "Iteration  ", t, "-----------------------------------------\n");
-	printf("%f", x[1]);
-	printf("%s", " - ");
-	printf("%f", x[2]);
-	printf("%s", "\n");
-	}
-
+	memcpy (y, outputs[t % NUM_TRAINING], sizeof (outputs[0])); //copy the output 
+	++t;
 	//Weighted Sumsfor Hidden nodes
 	memset (zhWeightedSums, 0, sizeof (zhWeightedSums)); //set all the weighted sums to zero
 	for (h=0; h<NUM_HIDDEN; h++)
@@ -92,6 +87,7 @@ for (t=0; t<iterations; t++)
 	hActivationValues[0]=1; //set the bias for the first hidden node to 1
 	for (h=0; h<NUM_HIDDEN; h++) 
 	{
+					//sigmoid
 		hActivationValues[h+1] =sigmoid(zhWeightedSums[h]); //apply activation function on other hidden nodes
 	}
 
@@ -110,6 +106,7 @@ for (t=0; t<iterations; t++)
 	//Probable Answers
 	for (sum=0, o=0; o<NUM_OUTPUTS; o++) 
 	{
+				//sigmoid
 		probabilities[o] = sigmoid(zyWeightedSums[o]);
 	 	sum += probabilities[o];
 	} //compute exp(z) for softmax
@@ -123,7 +120,7 @@ for (t=0; t<iterations; t++)
 	//output Error
 	for (o=0; o<NUM_OUTPUTS; o++) 
 	{
-		printf("%f",probabilities[0]);
+		
 		outputErrors[o] =y[o] -  probabilities[o]; //the error for each output
 	}
 	//Loss
@@ -133,17 +130,64 @@ for (t=0; t<iterations; t++)
 	}
 	loss /= 2.0;
 	/////////////////////////////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////////////////////////////
+	if (DEBUG) 
+	{
+		printf("%s","\n////////////////////////////////////////////////////\n\n");
+		
+		printf("%s", "INPUTS\t");
+		for (int i =0;i<NUM_INPUTS +1;i++)
+		{
+			printf("%f%s" , x[i], "\t");
+		
+		}
+		printf("%s", "\nInput-Hidden Weights  ");
+		for (int i = 0; i < NUM_INPUTS + 1 ;i++)
+		{
+			for (h=0;h<NUM_HIDDEN; h++)
+			{
+				printf("%f%s", Wxh[i][h], "  ");
+			}
+		}
+		printf("%s", "\nHidden Weighted SUM              ");
+		for (h=0;h<NUM_HIDDEN ; h++)
+		{
+			printf("%f%s",zhWeightedSums[h], "  ");
+		}
+		printf("%s", "\nHidden Sigmoid VAL   ");
+		for (h=0;h<NUM_HIDDEN +1;h++)
+		{
+			printf("%f%s", hActivationValues[h], "  ");
+		}
+		printf("%s", "\nHidden-Output Weight SUM");
+		for (h=0;h<NUM_OUTPUTS;h++)
+		{
+			printf("%f%s", zyWeightedSums[h], "  ");
+		}
+		printf("%s", "\nOutput Weight-Sigmoid ");
+                for (h=0;h<NUM_OUTPUTS;h++)
+                {
+                        printf("%f%s", sigmoid(zyWeightedSums[h]), "  ");
+                }
+		printf("%s", "\nHidden-Output Weight");
+                for (o=0;o<NUM_OUTPUTS;o++)
+                {
+			for (h=0;h<NUM_HIDDEN +1;h++)
+			{
+                        printf("%f%s", Why[h][o], "  ");
+               		}
+		}
+
+		printf("%s%f","\nGUESS - ", probabilities[0]);
+		printf("%s","\n////////////////////////////////////////////////////\n");
+	}	
+
+/////////////////////////////////////////////////////////////////////////////////
 	//Finding the gradient
 	for (h=0; h<NUM_HIDDEN+1; h++) 
 	{
 		for (int o=0; o<NUM_OUTPUTS; o++) 
 		{
-			deltaWhy[h][o] = hActivationValues[h] * outputErrors[o];//Sec Opt Exist
-			if (DEBUG){
-			printf("%s","\nDeltaW-HO > ");
-			printf("%f",deltaWhy[h][o]);
-			}
+			deltaWhy[h][o] = (hActivationValues[h]) * outputErrors[o];//Sec Opt Exist
 		}
 	}
 	//Backward propagation
@@ -152,7 +196,8 @@ for (t=0; t<iterations; t++)
 	{
 		for (o=0; o<NUM_OUTPUTS; o++) 
 		{
-			hActivationValues[h] += Why[h][o] * sigmoidDerivative(outputErrors[o]) * outputErrors[o];
+							    //SigDev(outErr)
+			hActivationValues[h] = Why[h][o] * sigmoidDerivative(outputErrors[o]) * outputErrors[o];
 		}
 	}
 	
@@ -166,11 +211,8 @@ for (t=0; t<iterations; t++)
 	{
 		for (int h=0; h<NUM_HIDDEN; h++) 
 		{
+						//sigDev
 			deltaWxh[i][h] = x[i] * sigmoidDerivative((zhWeightedSums[h]))*hActivationValues[h];
-		if (DEBUG){
-			printf("%s", "\nDeltaW-IH > ");
-			printf("%f", deltaWxh[i][h]);
-		}
 		}
 	}
 	//Changing Weights
@@ -185,16 +227,8 @@ for (t=0; t<iterations; t++)
 	{
 		for (int h=0; h<NUM_HIDDEN; h++) 
 		{
-			Wxh[i][h] -= learningrate * deltaWxh[i][h];
+			Wxh[i][h] += learningrate * deltaWxh[i][h];
 		}
-	}
-	
-	if (DEBUG){
-	printf("%s", "\nloss-");
-	printf("%f",loss);
-	printf("%s", "\nOutput Prob --"); 	
-	printf("%f",probabilities[0] );
-	printf("\n");
 	}
 }
 
