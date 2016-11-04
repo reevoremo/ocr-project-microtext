@@ -1,10 +1,11 @@
 // Python XOR GATE
-import numpy as np
+//Gonna convert it to C
+#include <math.h>	//import numpy as np
 
-def sigmoid(z):
+float sigmoid(z):
     return 1/(1+np.exp(-z))
 
-def s_prime(z):
+float s_prime(z):
     return np.multiply(sigmoid(z), sigmoid(1.0-z))
 
 def init_weights(layers, epsilon):
@@ -41,18 +42,15 @@ def fit(X, Y, w, predict=False, x=None):
 def predict(x):
     return fit(X, Y, w, True, x)
 
-####
+int main()
+{
+float X[4][2] ={{0,0},{0,1}{,1,0},{1,1}};
+float Y[4]= {0,1,1,0}:
+	layers = [2,2,1]
+	epochs = 10000
+	alpha = 0.5
+	w = init_weights(layers, 1)
 
-X = np.mat([[0,0],
-            [0,1],
-            [1,0],
-            [1,1]])
-Y = np.mat([0,1,1,0])
-layers = [2,2,1]
-epochs = 10000
-alpha = 0.5
-w = init_weights(layers, 1)
-:w
 for i in range(epochs):
     w_grad = fit(X, Y, w)
     print w_grad
@@ -63,3 +61,6 @@ for i in range(len(X)):
     x = X[i]
     guess = predict(x)
     print x, ":", guess
+
+return 0;
+}
