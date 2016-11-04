@@ -73,6 +73,8 @@ while ( t<iterations)
 	// &x[1] send as ref
 	memcpy (y, outputs[t % NUM_TRAINING], sizeof (outputs[0])); //copy the output 
 	++t;
+	x[1] = sigmoid(x[1]);
+	x[2] = sigmoid(x[2]);
 	//Weighted Sumsfor Hidden nodes
 	memset (zhWeightedSums, 0, sizeof (zhWeightedSums)); //set all the weighted sums to zero
 	for (h=0; h<NUM_HIDDEN; h++)
@@ -88,7 +90,7 @@ while ( t<iterations)
 	for (h=0; h<NUM_HIDDEN; h++) 
 	{
 					//sigmoid
-		hActivationValues[h+1] =sigmoid(zhWeightedSums[h]); //apply activation function on other hidden nodes
+		hActivationValues[h+1] =(zhWeightedSums[h]); //apply activation function on other hidden nodes
 	}
 
 	//Weighted sum for output nodes
@@ -107,7 +109,7 @@ while ( t<iterations)
 	for (sum=0, o=0; o<NUM_OUTPUTS; o++) 
 	{
 				//sigmoid
-		probabilities[o] = sigmoid(zyWeightedSums[o]);
+		probabilities[o] = (zyWeightedSums[o]);
 	 	sum += probabilities[o];
 	} //compute exp(z) for softmax
 	for (o=0; o<NUM_OUTPUTS; o++) 
@@ -132,7 +134,7 @@ while ( t<iterations)
 	/////////////////////////////////////////////////////////////////////////////////
 	if (DEBUG) 
 	{
-		printf("%s","\n////////////////////////////////////////////////////\n\n");
+		printf("%s%d%s","\n////////////////////////////////////////////////////   ",t,"  \n\n");
 		
 		printf("%s", "INPUTS\t");
 		for (int i =0;i<NUM_INPUTS +1;i++)
