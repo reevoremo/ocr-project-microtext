@@ -12,10 +12,10 @@ float s_prime(float z) //def s_prime(z):
 }
 
 
-float * init_weights(float layers,float epsilon)//def init_weights(layers, epsilon):
+float * init_weights(int layers,float epsilon)//def init_weights(layers, epsilon):
 {
 	float weights[layers-1];
-    	for(int i =0;  i <(len(layers)-1); i++):
+    	for(int i =0;  i <layers -  1; i++)
 	{
 	       	float w = (float)rand()/(float)(RAND_MAX/2);  //w = np.random.rand(layers[i+1], layers[i]+1)
         	w = w * 2*epsilon - epsilon;
@@ -23,8 +23,9 @@ float * init_weights(float layers,float epsilon)//def init_weights(layers, epsil
     	}
 	return weights;
 }
-def fit(X, Y, w, predict=False, x=None):
-    w_grad = ([np.mat(np.zeros(np.shape(w[i]))) 
+float fit(float X[][], float Y[], float w[], bool predict=false, float x[] = {NULL} )//def fit(X, Y, w, predict=False, x=None):
+{   
+ w_grad = ([np.mat(np.zeros(np.shape(w[i]))) 
               for i in range(len(w))])
     for i in range(len(X)):
         x = x if predict else X[i]
@@ -45,30 +46,33 @@ def fit(X, Y, w, predict=False, x=None):
             delta = np.multiply(w[j].T*delta, s_prime(a_s[j]))
             w_grad[j-1] += (delta[1:] * a_s[j-1].T)
     return [w_grad[i]/len(X) for i in range(len(w))]
-
-def predict(x):
-    return fit(X, Y, w, True, x)
+}
+float predict(float x[])   //def predict(x):
+{    return fit(X, Y, w, True, x);}
 
 int main()
 {
 	float X[4][2]={{0,0},{0,1},{1,0},{1,1}};
         float Y[4]      = {0,1,1,0}; //Y = np.mat([0,1,1,0])
-        float layers[3] = {2,2,1}
-        float epochs = 10000
-        float alpha = 0.5
-        w = init_weights(layers, 1)
+        int layers[3] = {2,2,1};
+        float epochs = 10000;
+        float alpha = 0.5;
+        float *w = init_weights(3, 1);
 
 
-for i in range(epochs):
-    w_grad = fit(X, Y, w)
-    print w_grad
-    for j in range(len(w)):
-        w[j] -= alpha * w_grad[j]
-
-for i in range(len(X)):
-    x = X[i]
-    guess = predict(x)
-    print x, ":", guess
+	for(int i=0; i<epochs; i++)
+	{
+		w_grad = fit(X, Y, w);
+    		print w_grad
+    		for(int  j=0 ; j< 2; j++):
+        	{	
+			w[j] -= alpha * w_grad[j]
+		}
+	}
+for (int i=0; i <4; i++ )
+    float x[2] = X[i];
+    float guess = predict(x);
+    printf("%d%s%d%s%s",x[0],"-",x[1],"  >  ", guess); //print x, ":", guess
 
 return 0;
 }
