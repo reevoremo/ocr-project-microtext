@@ -12,14 +12,17 @@ float s_prime(float z) //def s_prime(z):
 }
 
 
-def init_weights(layers, epsilon):
-    weights = []
-    for i in range(len(layers)-1):
-        w = np.random.rand(layers[i+1], layers[i]+1)
-        w = w * 2*epsilon - epsilon
-        weights.append(np.mat(w))
-    return weights
-
+float * init_weights(float layers,float epsilon)//def init_weights(layers, epsilon):
+{
+	float weights[layers-1];
+    	for(int i =0;  i <(len(layers)-1); i++):
+	{
+	       	float w = (float)rand()/(float)(RAND_MAX/2);  //w = np.random.rand(layers[i+1], layers[i]+1)
+        	w = w * 2*epsilon - epsilon;
+        	weights[i]=w;
+    	}
+	return weights;
+}
 def fit(X, Y, w, predict=False, x=None):
     w_grad = ([np.mat(np.zeros(np.shape(w[i]))) 
               for i in range(len(w))])
