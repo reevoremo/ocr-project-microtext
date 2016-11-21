@@ -1,47 +1,10 @@
-/*
- * testcounting.c - This program tests the neural network libary by
- * teaching it to count from 0 to 7 in binary.
- *
- * April 7, 2016 - Reduced the number of hidden units from 20 to 3.
- *
- * It structures the neural network with 3 inputs, 3 hidden layers
- * and 3 outputs.
- *
- * The 3 inputs represent binary digits and are each either 0 or 1.
- * Since there are 3 of them, that means they can represent:
- * 000, 001, 010, 011, 100, 101, 110, 111
- * which are the binary equivalents of the digital numbers:
- *   0,   1,   2,   3,   4,   5,   6,   7
- *
- * This program trains the network such that for the given input
- * 000, it should set the three output units to 001. For the given
- * input 001, it should set the three output units to 010 (which is
- * decimal is 2), and so on... The table of trained inputs to outputs
- * is below. The decimal equivalent is given in paranthesis.
- *  input   output
- * -------  -------
- * 000 (0)  001 (1)
- * 001 (1)  010 (2)
- * 010 (2)  011 (3)
- * 011 (3)  100 (4)
- * 100 (4)  101 (5)
- * 101 (5)  110 (6)
- * 110 (6)  111 (7)
- * 111 (7)  000 (0)
- *
- * This means that given any number from 0 to 6, in binary, it will
- * output the next highest number. The exception is 7, wherein it will
- * output 0. The cool thing is that if you give it 0 and from then on
- * just take its output and give it right back as the input for the next
- * time around, all the while displaying the outputs, it will count
- * from 0 to 7 and repeat continuously i.e. it will count.
- */
+
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "backprop.h"
+#include "neural_net.h"
 
 static int verbose = 0;
 
@@ -54,7 +17,7 @@ static int parse_args(int argc, char **argv);
 #define NUMHIDDEN      2 /* number of hidden units */
 #define NUMOUTPUTS     1 /* number of output units */
 #define NUMINTRAINSET  4 /* number of values/epochs in the training set */
-#define NUMOFEVALS     8 /* number of values in the test set */
+#define NUMOFEVALS     4 /* number of values in the test set */
 
 static float InputVals[NUMINTRAINSET][NUMINPUTS] = {
    { 0.0, 0.0 },
@@ -69,18 +32,12 @@ static float TargetVals[NUMINTRAINSET][NUMOUTPUTS] = {
    { 0.0 }
 };
 static float TestInputVals[NUMOFEVALS][NUMINPUTS] = {
-   { 0.0, 1.0 },
-   { 0.0, 1.0 },
    { 0.0, 0.0 },
-   { 1.0, 1.0 },
+   { 0.0, 1.0 },
    { 1.0, 0.0 },
-   { 1.0, 0.0 },
-   { 0.0, 0.0 },
    { 1.0, 1.0 }
 };
-float TestCountFromZero[NUMINPUTS] = {
-   0.0, 0.0
-};
+
 
 float LastLearningError;
 float LastRMSError;
@@ -93,8 +50,7 @@ float ResultBHWeights[1*NUMHIDDEN];
 float ResultBiasVals[1];
 float ResultBOWeights[1*NUMOUTPUTS];
 
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
    int i, j, epoch, fd;
    bkp_network_t *net;
@@ -164,13 +120,11 @@ main(int argc, char **argv)
 
    printf("\n");
    printf("=======================================================\n");
-   printf("First, some quick tests, giving it binary numbers to see if it " 
-      "spits\nout the next number.\n");
    for (i = 0;  i < NUMOFEVALS;  i++) {
       printf("Evaluating inputs:");
       for (j = 0;  j < NUMINPUTS;  j++)
          printf(" %f", TestInputVals[i][j]);
-      printf(", %d\n", get_number(TestInputVals[i]));
+      
 
       if (bkp_set_input(net, 0, 0.0, TestInputVals[i]) == -1) {
          perror("bkp_set_input() failed");
@@ -183,40 +137,11 @@ main(int argc, char **argv)
       printf("Output values:");
       for (j = 0;  j < NUMOUTPUTS;  j++)
          printf(" %f", ResultOutputVals[j]);
-      printf(", %d\n", get_number(ResultOutputVals));
       printf("\n");
    }	
 
    printf("=======================================================\n");
-   printf("Next, getting it to count by using the outputs for the next inputs.\n");
-   /* NOTE: Starting from 0.0, 0.0, 1.0 is better for some reason.
-      0.0, 0.0, 0.0 -> 0.0, 0.0, 1.0 is not learned very well. */
-   printf("Making it count from binary 000 to 111.\n");
-   printf("Giving it the following for the first input:");
-   for (j = 0;  j < NUMINPUTS;  j++)
-      printf(" %f", TestCountFromZero[j]);
-   printf(", %d\n", get_number(TestCountFromZero));
-   if (bkp_set_input(net, 0, 0.0, TestCountFromZero) == -1) {
-      perror("bkp_set_input() failed");
-      exit(EXIT_FAILURE);
-   }
-   for (i = 0;  i < 3*NUMOFEVALS;  i++) {
-      if (bkp_evaluate(net, ResultOutputVals, NUMOUTPUTS*sizeof(float)) == -1) {
-         perror("bkp_evaluate() failed");
-         exit(EXIT_FAILURE);
-      }
-      printf("Ouput values, and also the next input values:");
-      for (j = 0;  j < NUMOUTPUTS;  j++)
-         printf(" %f", ResultOutputVals[j]);
-      printf(", %d\n", get_number(ResultOutputVals));
-      if (bkp_set_input(net, 0, 0.0, ResultOutputVals) == -1) {
-         perror("bkp_set_input() failed");
-         exit(EXIT_FAILURE);
-      }
-   }
-
    bkp_destroy_network(net);
-
    return 0;
 }
 

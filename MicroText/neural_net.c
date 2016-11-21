@@ -1,17 +1,4 @@
-/*
- * backprop.c
- * Backpropagation neural network library.
- *
- * 2016, April 7 - made bkp_query return BiasVals, BHWeights and BIWeights
- * 2016, April 3 - cleaned up version for website publication
- * 1992 - originally written around this time
- * A note of credit:
- * This code had its origins as code obtained back around 1992 by sending
- * a floppy disk to The Amateur Scientist, Scientific American magazine.
- * I've since modified and added to it a great deal, and it's even on 
- * its 3rd OS (MS-DOS -> QNX -> Windows). As I no longer have the 
- * original I can't know how much is left to give credit for.
- */
+
 #define CMDIFFSTEPSIZE   1 /* set to 1 for Chen & Mars differential step size */
 #define DYNAMIC_LEARNING 0 /* set to 1 for Dynamic Learning */
 #include <errno.h>
