@@ -7,6 +7,13 @@
 
  */
 
+
+#ifndef NEURAL_NET_H
+#define NEURAL_NET_H
+
+
+
+
 /* Neural network like class*/
 
 typedef struct {
@@ -56,3 +63,36 @@ typedef struct {
 
 } network_t ; /* _t to differentiate struct  */	
 
+/*
+ * network config for initialisation
+ */
+typedef struct {
+	int NumInputs;
+	int NUmHidden;
+	int NumOutputs;
+	
+	float StepSize;
+	
+	float Momentum;
+	
+	float cost;
+} config_t;
+
+int create_network(network_t **n, config_t *config);
+void destroy_network(network_t *n);
+int set_training_set(network_t *n, int ntrainset, float *tinputvals, float *targetvals);
+void clear_training_set(network_t *n);
+int learn(network_t *n, int ntimes);
+int evaluate(network_t *n, float *eoutputvals, int sizeofoutputvals);
+int query(network_t *n,
+      float *qlastlearningerror, float *qlastrmserror,
+        float *qinputvals, float *qihweights, float *qhiddenvals,
+        float *qhoweights, float *qoutputvals,
+      float *qbhweights, float *qbiasvals, float *qboweights);
+int set_input(network_t *n, int setall, float val, float *sinputvals);
+int set_output(network_t *n, int setall, float val, float *soutputvals);
+int loadfromfile(network_t **n, char *fname);
+int savetofile(network_t *n, char *fname);
+
+
+#endif
