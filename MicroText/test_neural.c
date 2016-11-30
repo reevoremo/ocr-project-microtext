@@ -79,6 +79,7 @@ int main(int argc, char **argv)
    LastRMSError = 99;
 
 
+
    for (epoch = 1;  LastRMSError > 0.0005  &&  epoch <= 1000000;  epoch++) {
       if (learn(net, 1) == -1) {
          perror("bkp_learn() failed");
@@ -104,6 +105,7 @@ int main(int argc, char **argv)
          }*/
          print_all_network_info(epoch);
       }
+	LastRMSError = net->LastRMSError;
    }
    if (verbose == 1) {
       /* The following prints everything in the neural network after

@@ -13,6 +13,10 @@
 #define random()             ((((float)rand()/(RAND_MAX)) * 2.0) - 1.0)
 
 
+#define DYNAMIC_LEARNING 0
+#define CMDIFFSTEPSIZE 1
+
+
 static void setup_all(network_t *n);
 static void forward(network_t *n);
 static void backward(network_t *n);
@@ -214,6 +218,44 @@ int learn(network_t *n, int ntimes)
       /* calculate the RMS error for the epoch just completed */
       n->LastRMSError = sqrt(n->RMSSquareOfOutputBetas / (n->NumInTrainSet * n->NumOutputs));
       n->RMSSquareOfOutputBetas = 0.0;
+
+/* DYNAMIC LEARNING added on 30/11/2016 */
+
+#if DYNAMIC_LEARNING 
+      if (n->Epoch > 1) {
+         if (n->PrevRMSError < n->LastRMSError) {
+            /* diverging */
+            n->NumConsecConverged = 0;
+            n->StepSize *= 0.95; /* make step size smaller */
+#if CMDIFFSTEPSIZE
+            n->HStepSize = 0.1 * n->StepSize;
+#endif
+#ifdef DISPLAYMSGS
+            printf("Epoch: %d Diverging:  Prev %f, New %f, Step size %f\n",
+               n->Epoch, n->PrevRMSError, n->LastRMSError, n->StepSize);
+#endif   
+         } else if (n->PrevRMSError > n->LastRMSError) {
+            /* converging */
+            n->NumConsecConverged++;
+            if (n->NumConsecConverged == 5) {
+               n->StepSize += 0.04; /* make step size bigger */
+#if CMDIFFSTEPSIZE
+               n->HStepSize = 0.1 * n->StepSize;
+#endif
+#ifdef DISPLAYMSGS
+               printf("Epoch: %d Converging: Prev %f, New %f, Step size %f\n",
+                  n->Epoch, n->PrevRMSError, n->LastRMSError, n->StepSize);
+#endif         
+               n->NumConsecConverged = 0;
+            }
+         } else {
+            n->NumConsecConverged = 0;
+         }
+      }
+      n->PrevRMSError = n->LastRMSError;
+#endif
+
+
 	}
  n->Learned = 1;
    return 0;
@@ -248,6 +290,7 @@ static void forward(network_t *n)
       n->OutputVals[o] = 0.0;
       for (h = 0;  h < n->NumHidden;  h++)
          n->OutputVals[o] = n->OutputVals[o] + (n->HiddenVals[h] * n->HOWeights[h+(o*n->NumHidden)]);
+
       for (b = 0;  b < n->NumBias;  b++)
          n->OutputVals[o] = n->OutputVals[o] + (n->BiasVals[b] * n->BOWeights[b+(o*n->NumBias)]);
       n->OutputVals[o] = sigmoid(n->OutputVals[o]);
@@ -278,12 +321,12 @@ static void backward(network_t *n)
          n->HiddenBetas[h] = n->HiddenBetas[h] +
             (n->HOWeights[h+(o*n->NumHidden)] * sigmoidDerivative(n->OutputVals[o]) * n->OutputBetas[o]);
 
-//#if CMDIFFSTEPSIZE
-//         deltaweight = n->HiddenVals[h] * n->OutputBetas[o];
-//#else
+#if CMDIFFSTEPSIZE
+         deltaweight = n->HiddenVals[h] * n->OutputBetas[o];
+#else
          deltaweight = n->HiddenVals[h] * n->OutputBetas[o] *
             sigmoidDerivative(n->OutputVals[o]);
-//#endif
+#endif
          n->HOWeights[h+(o*n->NumHidden)] = n->HOWeights[h+(o*n->NumHidden)] +
             (n->StepSize * deltaweight) +
             (n->Momentum * n->PrevDeltaHO[h+(o*n->NumHidden)]);
@@ -291,12 +334,12 @@ static void backward(network_t *n)
       }
       /* update bias to output weights */
       for (b = 0;  b < n->NumBias;  b++) {
-//#if CMDIFFSTEPSIZE
-//         deltaweight = n->BiasVals[b] * n->OutputBetas[o];
-//#else
+#if CMDIFFSTEPSIZE
+         deltaweight = n->BiasVals[b] * n->OutputBetas[o];
+#else
          deltaweight = n->BiasVals[b] * n->OutputBetas[o] +
             sigmoidDerivative(n->OutputVals[o]);
-//#endif
+#endif
          n->BOWeights[b+(o*n->NumBias)] = n->BOWeights[b+(o*n->NumBias)] +
             (n->StepSize * deltaweight) +
             (n->Momentum * n->PrevDeltaBO[b+(o*n->NumBias)]);
@@ -309,11 +352,11 @@ static void backward(network_t *n)
          deltaweight = n->InputVals[i] * sigmoidDerivative(n->HiddenVals[h]) *
             n->HiddenBetas[h];
          n->IHWeights[i+(h*n->NumInputs)] = n->IHWeights[i+(h*n->NumInputs)] +
-//#if CMDIFFSTEPSIZE
-//            (n->HStepSize * deltaweight) +
-//#else
+#if CMDIFFSTEPSIZE
+            (n->HStepSize * deltaweight) +
+#else
             (n->StepSize * deltaweight) +
-//#endif
+#endif
             (n->Momentum * n->PrevDeltaIH[i+(h*n->NumInputs)]);
          n->PrevDeltaIH[i+(h*n->NumInputs)] = deltaweight;
          if (n->Cost)
@@ -325,11 +368,11 @@ static void backward(network_t *n)
          deltaweight = n->BiasVals[b] * n->HiddenBetas[h] *
             sigmoidDerivative(n->HiddenVals[h]);
          n->BHWeights[b+(h*n->NumBias)] = n->BHWeights[b+(h*n->NumBias)] +
-//#if CMDIFFSTEPSIZE
-//            (n->HStepSize * deltaweight) +
-//#else
+#if CMDIFFSTEPSIZE
+            (n->HStepSize * deltaweight) +
+#else
             (n->StepSize * deltaweight) +
-//#endif
+#endif
             (n->Momentum * n->PrevDeltaBH[b+(h*n->NumBias)]);
          n->PrevDeltaBH[b+(h*n->NumBias)] = deltaweight;
          if (n->Cost)
@@ -382,7 +425,7 @@ int set_output(network_t *n, int setall, float val, float *soutputvals)
 }
 
 /* Executed after trainning to get results */
-int evaluate(network_t *n, float *eoutputvals, unsigned int sizeofoutputvals)
+int evaluate(network_t *n, float *eoutputvals, int sizeofoutputvals)
 {  
    if (!n) {
       errno = ENOENT;
