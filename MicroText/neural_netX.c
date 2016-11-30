@@ -1,6 +1,6 @@
 
 /**/
-
+#include <string.h>
 #include <errno.h>
 #include <math.h>
 #include <stdlib.h>
@@ -12,9 +12,14 @@
 /* random() for -1 to +1 */
 #define random()             ((((float)rand()/(RAND_MAX)) * 2.0) - 1.0)
 
+
+static void setup_all(network_t *n);
+static void forward(network_t *n);
+static void backward(network_t *n);
+
 int create_network(network_t **n, config_t *config)
 {
-	if ((*n = (bkp_network_t *) malloc(sizeof(bkp_network_t))) == NULL) 
+	if ((*n = (network_t *) malloc(sizeof(network_t))) == NULL) 
 	{
       		errno = ENOMEM;
       		return -1;
@@ -320,11 +325,11 @@ static void backward(network_t *n)
          deltaweight = n->BiasVals[b] * n->HiddenBetas[h] *
             sigmoidDerivative(n->HiddenVals[h]);
          n->BHWeights[b+(h*n->NumBias)] = n->BHWeights[b+(h*n->NumBias)] +
-#if CMDIFFSTEPSIZE
-            (n->HStepSize * deltaweight) +
-#else
+//#if CMDIFFSTEPSIZE
+//            (n->HStepSize * deltaweight) +
+//#else
             (n->StepSize * deltaweight) +
-#endif
+//#endif
             (n->Momentum * n->PrevDeltaBH[b+(h*n->NumBias)]);
          n->PrevDeltaBH[b+(h*n->NumBias)] = deltaweight;
          if (n->Cost)
@@ -334,4 +339,76 @@ static void backward(network_t *n)
    }
 }
 
+
+/* Set GivenInputVals to sinputvals if setall is 0 else fill with val*/
+int set_input(network_t *n, int setall, float val, float *sinputvals)
+{
+   int i;
+
+   if (!n) {
+      errno = ENOENT;
+      return -1;
+   }
+
+   if (setall) {
+      for (i = 0;  i < n->NumInputs;  i++)
+         n->GivenInputVals[i] = val;
+   } else {
+      memcpy(n->GivenInputVals, sinputvals, n->NumInputs*sizeof(float));
+   }
+
+   n->InputReady = 1;
+   return 0;
+}
+/* Same as input for output   */
+int set_output(network_t *n, int setall, float val, float *soutputvals)
+{
+   int i;
+
+   if (!n) {
+      errno = ENOENT;
+      return -1;
+   }
+
+   if (setall) {
+      for (i = 0;  i < n->NumOutputs;  i++)
+         n->GivenDesiredOutputVals[i] = val;
+   } else {
+      memcpy(n->GivenDesiredOutputVals, soutputvals, n->NumOutputs*sizeof(float));
+   }
+
+   n->DesiredOutputReady = 1;
+   return 0;
+}
+
+/* Executed after trainning to get results */
+int evaluate(network_t *n, float *eoutputvals, unsigned int sizeofoutputvals)
+{  
+   if (!n) {
+      errno = ENOENT;
+      return -1;
+   }
+   if (!n->InputReady) {
+      errno = ESRCH;
+      return -1;
+   }
+   if (!n->Learned) {
+      errno = ENODEV;
+      return -1;
+   }
+   
+   n->InputVals = n->GivenInputVals;
+   n->DesiredOutputVals = n->GivenDesiredOutputVals;
+   
+   forward(n);
+   
+   if (eoutputvals) {
+      if (sizeofoutputvals != n->NumOutputs*sizeof(float)) {
+         errno = EINVAL;
+         return -1;
+      }
+      memcpy(eoutputvals, n->OutputVals, n->NumOutputs*sizeof(float));
+   }
+   return 0;
+}
 

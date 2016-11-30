@@ -4,12 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "neural_net.h"
+#include "neural_netX.h"
 
-static int verbose = 0;
+static int verbose = 3;
 
 static void print_all_network_info(int epoch);
-static int get_number(float *vals);
+//static int get_number(float *vals);
 static int parse_args(int argc, char **argv);
 
 
@@ -52,41 +52,43 @@ float ResultBOWeights[1*NUMOUTPUTS];
 
 int main(int argc, char **argv)
 {
-   int i, j, epoch, fd;
-   bkp_network_t *net;
-   bkp_config_t config;
+   int i, j, epoch;//fd
+   network_t *net;
+   config_t config;
 
    if (parse_args(argc, argv) == -1)
       exit(EXIT_FAILURE);
 
-   config.Type = BACKPROP_TYPE_NORMAL;
+  // config.Type = BACKPROP_TYPE_NORMAL;
    config.NumInputs = NUMINPUTS;
    config.NumHidden = NUMHIDDEN;
    config.NumOutputs = NUMOUTPUTS;
    config.StepSize = 0.25;
    config.Momentum = 0.90;
    config.Cost = 0.0;
-   if (bkp_create_network(&net, &config) == -1) {
+   if (create_network(&net, &config) == -1) {
       perror("bkp_create_network() failed");
       exit(EXIT_FAILURE);
    }	
 
-   if (bkp_set_training_set(net, NUMINTRAINSET, (float *) InputVals, (float *) TargetVals) == -1) {
+   if (set_training_set(net, NUMINTRAINSET, (float *) InputVals, (float *) TargetVals) == -1) {
       perror("bkp_set_training_set() failed");
       exit(EXIT_FAILURE);
    }
 
    LastRMSError = 99;
+
+
    for (epoch = 1;  LastRMSError > 0.0005  &&  epoch <= 1000000;  epoch++) {
-      if (bkp_learn(net, 1) == -1) {
+      if (learn(net, 1) == -1) {
          perror("bkp_learn() failed");
          exit(EXIT_FAILURE);
       }
       if (verbose <= 1) {
-         if (bkp_query(net, NULL, &LastRMSError, NULL,
+       /*  if (query(net, NULL, &LastRMSError, NULL,
                NULL, NULL, NULL, NULL, NULL, NULL, NULL) == -1) {
             perror("bkp_query() failed");
-         }
+         }*/
       } else  if (verbose == 2) {
          /* The following prints everything in the neural network for
             each step during the learning. It's just to illustrate
@@ -94,24 +96,24 @@ int main(int argc, char **argv)
             debug or fine tune the network.
             Warning: Doing all this printing will slow things down
             significantly.  */
-         if (bkp_query(net, &LastLearningError, &LastRMSError, ResultInputVals,
+        /*  if (query(net, &LastLearningError, &LastRMSError, ResultInputVals,
                ResultIHWeights, ResultHiddenVals, ResultHOWeights, 
                ResultOutputVals,
                ResultBHWeights, ResultBiasVals, ResultBOWeights) == -1) {
             perror("bkp_query() failed");
-         }
+         }*/
          print_all_network_info(epoch);
       }
    }
    if (verbose == 1) {
       /* The following prints everything in the neural network after
          the last learned training set. */
-      if (bkp_query(net, &LastLearningError, &LastRMSError, ResultInputVals,
+     /* if (query(net, &LastLearningError, &LastRMSError, ResultInputVals,
             ResultIHWeights, ResultHiddenVals, ResultHOWeights, 
             ResultOutputVals,
             ResultBHWeights, ResultBiasVals, ResultBOWeights) == -1) {
          perror("bkp_query() failed");
-      }
+      }*/
       print_all_network_info(epoch);
    }
 
@@ -126,11 +128,11 @@ int main(int argc, char **argv)
          printf(" %f", TestInputVals[i][j]);
       
 
-      if (bkp_set_input(net, 0, 0.0, TestInputVals[i]) == -1) {
+      if (set_input(net, 0, 0.0, TestInputVals[i]) == -1) {
          perror("bkp_set_input() failed");
          exit(EXIT_FAILURE);
       }
-      if (bkp_evaluate(net, ResultOutputVals, NUMOUTPUTS*sizeof(float)) == -1) {
+      if (evaluate(net, ResultOutputVals, NUMOUTPUTS*sizeof(float)) == -1) {
          perror("bkp_evaluate() failed");
          exit(EXIT_FAILURE);
       }
@@ -141,7 +143,7 @@ int main(int argc, char **argv)
    }	
 
    printf("=======================================================\n");
-   bkp_destroy_network(net);
+   destroy_network(net);
    return 0;
 }
 
@@ -188,7 +190,7 @@ static void print_all_network_info(int epoch)
  * converted to 0, 1, 0 or 010 which is a binary number that is 2 in 
  * digital. This will therefore return a 2.
  */
-static int get_number(float *vals)
+/*static int get_number(float *vals)
 {
    int num = 0, i;
 
@@ -197,7 +199,7 @@ static int get_number(float *vals)
          num += 1 << ((NUMOUTPUTS-i)-1);
    return num;
 }
-
+*/
 static int parse_args(int argc, char **argv)
 {
    int c;

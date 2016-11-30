@@ -68,14 +68,14 @@ typedef struct {
  */
 typedef struct {
 	int NumInputs;
-	int NUmHidden;
+	int NumHidden;
 	int NumOutputs;
 	
 	float StepSize;
 	
 	float Momentum;
 	
-	float cost;
+	float Cost;
 } config_t;
 
 int create_network(network_t **n, config_t *config);
