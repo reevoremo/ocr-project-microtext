@@ -1,10 +1,13 @@
 # include <SDL/SDL.h>
 # include <SDL/SDL_image.h>
 # include <stdlib.h>
+# include <stdio.h>
+# include <string.h>
 # include <err.h>
 # include <unistd.h>
 # include <sys/stat.h>
 # include <sys/types.h>
+# include <gtk/gtk.h>
 
 # include "pixel_operations.h"
 
@@ -78,7 +81,7 @@ void change_pixel(SDL_Surface *img, int x, int y){
   Uint32 pixel = getpixel(img, x, y);
   SDL_GetRGB(pixel, img->format, &r, &g, &b);
   nC = (0.3*r + 0.59*g + 0.11*b)/3;
-  if (nC < 40)
+  if (nC < 45)
     nC = 0;
   else
     nC = 255;
@@ -106,6 +109,8 @@ int main(int argc, char **argv)
   //Img_array line;
   Img_array cha;
 
+  make_interface(argc, argv);
+
   init_sdl();
   img = load_image(concat(argv[1], concat("/", argv[2])));
   change_Image(img);
@@ -113,6 +118,69 @@ int main(int argc, char **argv)
   save_characters(cha, argv[2]);
   display_image(img);
   
+}
+
+int make_interface(int argc, char **argv)
+{
+  GtkWidget *window;
+  //GdkPixbuf *icon;
+  GtkWidget *vbox;
+
+  GtkWidget *menubar;
+  GtkWidget *fileMenu;
+  GtkWidget *fileMi;
+  GtkWidget *quitMi;
+
+  gtk_init(&argc, &argv);
+
+  window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_title(GTK_WINDOW(window), "Simple Menu");
+  gtk_window_set_default_size(GTK_WINDOW(window), 600, 400);
+  gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+
+  vbox = gtk_vbox_new(FALSE, 0);
+  gtk_container_add(GTK_CONTAINER(window), vbox);
+
+  menubar = gtk_menu_bar_new();
+  fileMenu = gtk_menu_new();
+
+  fileMi = gtk_menu_item_new_with_label("File");
+  quitMi = gtk_menu_item_new_with_label("Quit");
+
+  gtk_menu_item_set_submenu(GTK_MENU_ITEM(fileMi), fileMenu);
+  gtk_menu_shell_append(GTK_MENU_SHELL(fileMenu), quitMi);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menubar), fileMi);
+  gtk_box_pack_start(GTK_BOX(vbox), menubar, FALSE, FALSE, 0);
+
+  //icon = create_pixbuf("/home/pierre/Downloads/icon_test.jpeg");
+  //gtk_window_set_icon(GTK_WINDOW(window), icon);
+
+  g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+  g_signal_connect(G_OBJECT(quitMi), "activate", G_CALLBACK(gtk_main_quit), NULL);
+
+  gtk_widget_show_all(window);
+
+  //g_object_unref(icon);
+
+  gtk_main();
+
+  return 0;
+}
+
+GdkPixbuf *create_pixbuf(const gchar *filename)
+{
+  GdkPixbuf *pixbuf;
+  GError *error = NULL;
+  pixbuf = gdk_pixbuf_new_from_file(filename, &error);
+
+  if (!pixbuf)
+  {
+    fprintf(stderr, "%s\n", error->message);
+    g_error_free(error);
+  }
+
+  return pixbuf;
 }
 
 //This function save every single possible character of the image in a folder
@@ -132,8 +200,36 @@ void save_characters(Img_array characters, char *file_name)
     int index = i;
     char num[3];
     sprintf(num, "%d", index);
-    SDL_SaveBMP(characters.array[i], concat(concat(concat(concat(dir, "/"), file_name), "/"), num));
+    char *saveFile = concat(concat(concat(concat(dir, "/"), file_name), "/"), num);
+    SDL_SaveBMP(characters.array[i], saveFile);
+    char_to_matrix(characters.array[i], saveFile);
+    //save_matrix(matrix, saveFile);
   }
+}
+
+void char_to_matrix(SDL_Surface *chara, char *save)
+{
+  char *saveFile = concat(save, ".txt");
+
+  FILE *f = fopen(saveFile, "w");
+  
+  for (int i = 0; i < chara->h; i++)
+  {
+    for (int j = 0; j < chara->w; j++)
+    {
+      Uint32 pixel = getpixel(chara, j, i);
+      if (pixel == 0)
+      {
+        fprintf(f, "1");
+      }
+      else
+      {
+        fprintf(f, "0");
+      }
+    }
+    fprintf(f, "\n");
+  }
+  fclose(f);
 }
 
 //This function concatenates two strings
