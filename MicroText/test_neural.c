@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 
 
 
-   for (epoch = 1;  LastRMSError > 0.0005  &&  epoch <= 1000000;  epoch++) {
+   for (epoch = 1;  LastRMSError > 0.0001  &&  epoch <= 1000000;  epoch++) {
       if (learn(net, 1) == -1) {
          perror("bkp_learn() failed");
          exit(EXIT_FAILURE);
