@@ -2,10 +2,10 @@
  
 CC=clang
  
-CPPFLAGS= `pkg-config --cflags sdl`
+CPPFLAGS= `pkg-config --cflags sdl gtk+-2.0`
 CFLAGS= -Wall -Wextra -Werror -std=c99 -O3
 LDFLAGS=
-LDLIBS= `pkg-config --libs sdl` -lSDL_image
+LDLIBS= `pkg-config --libs sdl gtk+-2.0` -lSDL_image
  
 SRC= image_blocking.c pixel_operations.c main.c
 OBJ= ${SRC:.c=.o}
