@@ -1,6 +1,6 @@
 ## Simple SDL mini code
  
-CC=clang
+CC=gcc
  
 CPPFLAGS= `pkg-config --cflags sdl gtk+-2.0`
 CFLAGS= -Wall -Wextra -Werror -std=c99 -O3
