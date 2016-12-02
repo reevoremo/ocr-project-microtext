@@ -187,9 +187,10 @@ GdkPixbuf *create_pixbuf(const gchar *filename)
 void save_characters(Img_array characters, char *file_name)
 {
   char dir[1024];
+  //getcwd(dir, sizeof(dir));
   if (getcwd(dir, sizeof(dir))!=NULL)
   {
-//	return NULL;
+  	return;
   }
 
   struct stat st;
