@@ -34,7 +34,7 @@ Img_array line_image_blocking(SDL_Surface *image)
         {
           SDL_Surface *result;
 
-          result = SDL_CreateRGBSurface(0, image->w, i - start, 32, 0, 0, 0, 0);
+          result = SDL_CreateRGBSurface(0, image->w, i - start, 32, 0, 0, 0,0);
           SDL_Rect rect = {0, start, image->w, i - start};
 
           SDL_UnlockSurface(result);
@@ -71,13 +71,39 @@ Img_array column_image_blocking(Img_array lines)
           {
             SDL_Surface *result;
 
-            result = SDL_CreateRGBSurface(0, i - start, img->h, 32, 0, 0, 0, 0);
+            result = SDL_CreateRGBSurface(0, i - start, img->h, 32, 0, 0, 0,0);
             SDL_Rect rect = {start, 0, i - start, img->h};
 
             SDL_UnlockSurface(result);
 
             SDL_BlitSurface(img, &rect, result, NULL);
-            insert_array(&chars, result);
+
+            result = height_fix(result);
+
+            SDL_Surface *scaleResult;
+            scaleResult = SDL_CreateRGBSurface(0, 20, 20, 32, 0, 0, 0, 0);
+
+            if (result->h < result->w)
+            {
+              float scale = (float)20 / result->w;
+              scaleResult = SDL_CreateRGBSurface(0, result->w * scale, result->h * scale, 32, 0, 0, 0, 0);
+              SDL_SoftStretch(result, NULL, scaleResult, NULL);
+            }
+            else
+            {
+              float scale = (float)20 / result->h;
+              scaleResult = SDL_CreateRGBSurface(0, result->w * scale, result->h * scale, 32, 0, 0, 0, 0);
+              SDL_SoftStretch(result, NULL, scaleResult, NULL);
+            }
+
+            SDL_Surface *whiteSpace;
+            whiteSpace = SDL_CreateRGBSurface(0, 24, 24, 32, 0, 0, 0, 0);
+            SDL_FillRect(whiteSpace, NULL, 0xFFFFFFFF);
+            SDL_Rect rekt = {(24 - scaleResult->w) / 2, (24 - scaleResult->h) / 2, 16, 16};
+
+            SDL_BlitSurface(scaleResult, NULL, whiteSpace, &rekt);
+
+            insert_array(&chars, whiteSpace);
             break;
           }
         }
@@ -86,6 +112,27 @@ Img_array column_image_blocking(Img_array lines)
     }
   }
   return chars;
+}
+
+SDL_Surface *height_fix(SDL_Surface *img)
+{
+  int i = 0;
+  while (is_full_line(img, i) == 1)
+  {
+    i++;
+  }
+  int j = img->h - 1;
+  while (is_full_line(img, j) == 1)
+  {
+    j--;
+  }
+  SDL_Surface *result;
+  result = SDL_CreateRGBSurface(0, img->w, j - i + 1, 32, 0, 0, 0, 0);
+  SDL_Rect rect = {0, i, img->w, j - i + 1};
+
+  SDL_BlitSurface(img, &rect, result, NULL);
+
+  return result;
 }
 
 //This function checks if a line contains only pixels of the same color

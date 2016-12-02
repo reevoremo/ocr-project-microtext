@@ -32,6 +32,8 @@ void insert_array(Img_array *a, SDL_Surface *element);
 
 void free_array(Img_array *a);
 
+SDL_Surface *height_fix(SDL_Surface *img);
+
 /*void char_init_array(Char_array *a, size_t init_size);
 
 void char_insert_array(Char_array *a, Img_array element);
