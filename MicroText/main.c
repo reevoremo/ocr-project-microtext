@@ -186,29 +186,34 @@ GdkPixbuf *create_pixbuf(const gchar *filename)
 //This function save every single possible character of the image in a folder
 void save_characters(Img_array characters, char *file_name)
 {
-  char dir[1024];
-  //getcwd(dir, sizeof(dir));
-  if (getcwd(dir, sizeof(dir))!=NULL)
+  char dir[1048];
+
+  if (getcwd(dir, sizeof(dir)) == NULL)
   {
   	return;
   }
 
   struct stat st;
-  if (stat(concat(concat(dir, "/"), file_name), &st) == -1)
+
+  char *save_dir = concat(concat(dir, "/"), file_name);
+
+  if (stat(save_dir, &st) == -1)
   {
-    mkdir(concat(concat(dir, "/"), file_name), 0700);
+    mkdir(save_dir, 0700);
   }
 
   for (size_t i = 0; i < characters.used; i++)
   {
     int index = i;
-    char num[3];
+    char num[10];
     sprintf(num, "%d", index);
-    char *saveFile = concat(concat(concat(concat(dir, "/"), file_name), "/"), num);
+    char *saveFile = concat(concat(save_dir, "/"), num);
     SDL_SaveBMP(characters.array[i], saveFile);
     char_to_matrix(characters.array[i], saveFile);
     //save_matrix(matrix, saveFile);
+    free(saveFile);
   }
+  free(save_dir);
 }
 
 void char_to_matrix(SDL_Surface *chara, char *save)
