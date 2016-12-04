@@ -264,7 +264,7 @@ void char_to_matrix(SDL_Surface *chara, char *save)
         fprintf(f, "0");
       }
     }
-    fprintf(f, "\n");
+   // fprintf(f, "\n"); Removed For training BY Remo 
   }
   fclose(f);
 }
