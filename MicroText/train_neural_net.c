@@ -19,9 +19,9 @@ static int parse_args(int argc, char **argv);
 
 #define NUMINPUTS      576 /* number of input units */
 #define NUMHIDDEN      576 /* number of hidden units */
-#define NUMOUTPUTS     5 /* number of output units */
-#define NUMINTRAINSET  5 /* number of values/epochs in the training set */
-#define NUMOFEVALS     5 /* number of values in the test set */
+#define NUMOUTPUTS     90 /* number of output units */
+#define NUMINTRAINSET  90 /* number of values/epochs in the training set */
+#define NUMOFEVALS     90 /* number of values in the test set */
 
 /*
 static float InputVals[NUMINTRAINSET][NUMINPUTS] = {
@@ -78,7 +78,7 @@ for (int fn = 0 ;fn < NUMINTRAINSET;fn++){
 
 	char buf[12];
       	sprintf(buf, "%d.txt", fn); // puts string into buffer
-      	printf("%s\n", buf); // outputs so you can see it
+//      	printf("%s\n", buf); // outputs so you can see it
    	
  	//char *openFile = );    
     	myFile = fopen(concat("train.bmp/",buf), "r");
@@ -89,10 +89,10 @@ for (int fn = 0 ;fn < NUMINTRAINSET;fn++){
         	fscanf(myFile, "%1f", &InputVals[fn][k]);
 		TestInputVals[fn][k] = InputVals[fn][k];
 	}
-	for (int k = 0; k < 576; k++)
-	{
-        	printf("Num is: %f\n\n", InputVals[fn][k]);
-	}
+//	for (int k = 0; k < 576; k++)
+//	{
+ //       	printf("Num is: %f\n\n", InputVals[fn][k]);
+//	}
 	TargetVals[fn][fn]=1.0;
 }
 
@@ -125,7 +125,8 @@ for (int fn = 0 ;fn < NUMINTRAINSET;fn++){
 
 
 
-   for (epoch = 1;  LastRMSError > 0.005  &&  epoch <= 1000000;  epoch++) {
+   for (epoch = 1;  LastRMSError > 0.05  &&  epoch <= 1000000;  epoch++) {
+	if(DEBUG){printf("Learning Loop: %d RMSError: %f\n", epoch,LastRMSError);}
       if (learn(net, 1) == -1) {
          perror("learn() failed");
          exit(EXIT_FAILURE);

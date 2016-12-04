@@ -13,7 +13,7 @@
 #define random()             ((((float)rand()/(RAND_MAX)) * 2.0) - 1.0)
 
 
-#define DYNAMIC_LEARNING 0
+#define DYNAMIC_LEARNING 0 
 #define CMDIFFSTEPSIZE 1
 
 
