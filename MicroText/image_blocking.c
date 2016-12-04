@@ -6,7 +6,9 @@
 # include "pixel_operations.h"
 
 # include "image_blocking.h"
-
+#ifndef DEBUG
+#define DEBUG 1 
+#endif
 //This function puts every possible character in an array of type Img_array
 Img_array image_blocking(SDL_Surface *image)
 {
@@ -18,7 +20,7 @@ Img_array image_blocking(SDL_Surface *image)
 //We check this by seeing if the line contains only pixels from the same color
 Img_array line_image_blocking(SDL_Surface *image)
 {
-  
+  if(DEBUG){printf("Started: Line Block\n");}  
   Img_array lines;
 
   //result = SDL_CreateRGBSurface(0, image->w, image->h, 32, 0, 0, 0, 0);
@@ -47,14 +49,18 @@ Img_array line_image_blocking(SDL_Surface *image)
       //break;
     }
   }
+  if(DEBUG){printf("End: Line Block\n");}
+
   return lines;
 }
 
 //Same as line_image_blocking but with columns
 Img_array column_image_blocking(Img_array lines)
 {
-  Img_array chars;
 
+  if(DEBUG){printf("Started: Column block\n");}
+
+  Img_array chars;
   init_array(&chars, 5);
 
   for (size_t line = 0; line < lines.used; line++)
@@ -99,7 +105,7 @@ Img_array column_image_blocking(Img_array lines)
             SDL_Surface *whiteSpace;
             whiteSpace = SDL_CreateRGBSurface(0, 24, 24, 32, 0, 0, 0, 0);
             SDL_FillRect(whiteSpace, NULL, 0xFFFFFFFF);
-            SDL_Rect rekt = {(24 - scaleResult->w) / 2, (24 - scaleResult->h) / 2, 16, 16};
+            SDL_Rect rekt = {(24 - scaleResult->w) / 2, (24 - scaleResult->h) / 2, 20, 20};
 
             SDL_BlitSurface(scaleResult, NULL, whiteSpace, &rekt);
 
@@ -111,6 +117,8 @@ Img_array column_image_blocking(Img_array lines)
       }
     }
   }
+	if(DEBUG){printf("End: ChangePixel\n");}
+
   return chars;
 }
 
@@ -138,9 +146,11 @@ SDL_Surface *height_fix(SDL_Surface *img)
 //This function checks if a line contains only pixels of the same color
 int is_full_line(SDL_Surface *image, int line)
 {
-  Uint32 color = getpixel(image, 0, line);
+  Uint32 color =16777215;// getpixel(image, 0, line);
   for (int i = 1; i < image->w; i++)
   {
+	if(DEBUG){printf("End: ChangePixel:%d\n",color);}
+
     if (getpixel(image, i, line) != color)
       return 0;
   }
@@ -150,7 +160,9 @@ int is_full_line(SDL_Surface *image, int line)
 //Same as is_full_line but with columns
 int is_full_column(SDL_Surface *image, int column)
 {
-  Uint32 color = getpixel(image, column, 0);
+  Uint32 color =16777215; // getpixel(image, column, 0);
+	 if(DEBUG){printf("End: ChangePixel:%d\n",color);}
+
   for (int i = 1; i < image->h; i++)
   {
     if (getpixel(image, column, i) != color)
