@@ -5,6 +5,11 @@
 #include <unistd.h>
 #include "neural_netX.h"
 #include <string.h>
+
+#ifndef DEBUG
+#define DEBUG 1
+#endif
+
 static int verbose = 3;
 
 static void print_all_network_info(int epoch);
@@ -14,9 +19,9 @@ static int parse_args(int argc, char **argv);
 
 #define NUMINPUTS      576 /* number of input units */
 #define NUMHIDDEN      576 /* number of hidden units */
-#define NUMOUTPUTS     89 /* number of output units */
-#define NUMINTRAINSET  89 /* number of values/epochs in the training set */
-#define NUMOFEVALS     89 /* number of values in the test set */
+#define NUMOUTPUTS     5 /* number of output units */
+#define NUMINTRAINSET  5 /* number of values/epochs in the training set */
+#define NUMOFEVALS     5 /* number of values in the test set */
 
 /*
 static float InputVals[NUMINTRAINSET][NUMINPUTS] = {
@@ -67,8 +72,9 @@ float TargetVals[NUMINTRAINSET][NUMOUTPUTS];
 float TestInputVals[NUMOFEVALS][NUMINPUTS];
 
 
+
 FILE *myFile;
-for (int fn = 0 ;fn < 89;fn++){
+for (int fn = 0 ;fn < NUMINTRAINSET;fn++){
 
 	char buf[12];
       	sprintf(buf, "%d.txt", fn); // puts string into buffer
@@ -81,16 +87,13 @@ for (int fn = 0 ;fn < 89;fn++){
 	for (int k = 0; k < 576; k++)
 	{
         	fscanf(myFile, "%1f", &InputVals[fn][k]);
-		if (fn==k) {TargetVals[fn][k]=1.0;}else{TargetVals[fn][k]=0;}
 		TestInputVals[fn][k] = InputVals[fn][k];
 	}
 	for (int k = 0; k < 576; k++)
 	{
-//        	printf("Num is: %f\n\n", InputVals[fn][k]);
+        	printf("Num is: %f\n\n", InputVals[fn][k]);
 	}
-
-
-
+	TargetVals[fn][fn]=1.0;
 }
 
 
@@ -109,12 +112,12 @@ for (int fn = 0 ;fn < 89;fn++){
    config.Momentum = 0.90;
    config.Cost = 0.0;
    if (create_network(&net, &config) == -1) {
-      perror("bkp_create_network() failed");
+      perror("create_network() failed");
       exit(EXIT_FAILURE);
    }
 
    if (set_training_set(net, NUMINTRAINSET, (float *) InputVals, (float *) TargetVals) == -1) {
-      perror("bkp_set_training_set() failed");
+      perror("set_training_set() failed");
       exit(EXIT_FAILURE);
    }
 
@@ -122,9 +125,9 @@ for (int fn = 0 ;fn < 89;fn++){
 
 
 
-   for (epoch = 1;  LastRMSError > 0.0055555  &&  epoch <= 1000000;  epoch++) {
+   for (epoch = 1;  LastRMSError > 0.005  &&  epoch <= 1000000;  epoch++) {
       if (learn(net, 1) == -1) {
-         perror("bkp_learn() failed");
+         perror("learn() failed");
          exit(EXIT_FAILURE);
       }
       if (verbose <= 1) {
@@ -170,23 +173,34 @@ for (int fn = 0 ;fn < 89;fn++){
    printf("=======================================================\n");
    for (i = 0;  i < NUMOFEVALS;  i++) {
       printf("Evaluating inputs:");
-      for (j = 0;  j < NUMINPUTS;  j++)
+      for (j = 0;  j < 1;  j++)
          printf(" %f", TestInputVals[i][j]);
 
 
       if (set_input(net, 0, 0.0, TestInputVals[i]) == -1) {
-         perror("bkp_set_input() failed");
+         perror("set_input() failed");
          exit(EXIT_FAILURE);
       }
+
       if (evaluate(net, ResultOutputVals, NUMOUTPUTS*sizeof(float)) == -1) {
-         perror("bkp_evaluate() failed");
+         perror("evaluate() failed");
          exit(EXIT_FAILURE);
       }
       printf("Output values:");
-      for (j = 0;  j < NUMOUTPUTS;  j++)
-         printf(" %f", ResultOutputVals[j]);
-      printf("\n");
+	int maxVal = 0;
+      	for (j = 0;  j < NUMOUTPUTS;  j++)
+	{
+        	if (ResultOutputVals[maxVal]<ResultOutputVals[j])
+		{
+			maxVal = j;
+		} 
+		//printf(" %f", ResultOutputVals[j]);
+      	}
+	printf("%c " , maxVal  + 33);
+	printf("\n");
    }
+
+
 
    printf("=======================================================\n");
    destroy_network(net);
