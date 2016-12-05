@@ -124,7 +124,7 @@ Img_array column_image_blocking(Img_array lines)
 
             if (result->h < result->w)
             {
-              float scale = (float)20 / result->w;
+              float scale = (float)22 / result->w;
               scaleResult = SDL_CreateRGBSurface(0, result->w * scale, result->h * scale, 32, 0, 0, 0, 0);
               SDL_SoftStretch(result, NULL, scaleResult, NULL);
             }
