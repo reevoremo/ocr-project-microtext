@@ -15,6 +15,8 @@
 
 # include "main.h"
 
+char *inputFile;
+char *outputFolder;
 
 #define DEBUG 1 //If set to one, prints current task. Can be used to detect problems
 void wait_for_keypressed(void) {
@@ -117,16 +119,16 @@ if(DEBUG){printf("End: ChangePixel\n");}
 
 int main(int argc, char **argv)
 {
-  argc = 3;
+  //argc = 3;
   SDL_Surface *img;
   //Img_array line;
   Img_array cha;
 
-  make_interface(argc, argv);
+  load_interface(argc, argv);
 
   init_sdl();
-  img = load_image(concat(argv[1], concat("/", argv[2])));
-  if(DEBUG){printf("Image path: %s\n",concat(argv[1],concat("/",argv[2])));}
+  img = load_image(inputFile/*concat(argv[1], concat("/", argv[2]))*/);
+  if(DEBUG){printf("Image path: %s\n",inputFile/*concat(argv[1],concat("/",argv[2]))*/);}
   if(img==NULL)
   {
 	if(DEBUG){
@@ -143,7 +145,9 @@ if(DEBUG){printf("Started: ImageBlock\n");}
   cha = image_blocking(img);
 if(DEBUG){printf("End: ImageBlock\n");}
 
-  save_characters(cha, argv[2]);
+  save_interface(argc, argv);
+
+  save_characters(cha, outputFolder/*argv[2]*/);
  // display_image(img); //moved above
   
 }
@@ -158,38 +162,17 @@ void file_get(GtkWidget *w, gpointer user_data)
 
   selected_filename = gtk_file_selection_get_filename(GTK_FILE_SELECTION(file_selector));
   g_print("Selected filename: %s\n", selected_filename);
+
+  inputFile = (char *)selected_filename;
 }
 
-int make_interface(int argc, char **argv)
+int load_interface(int argc, char **argv)
 {
-  GtkWidget *window;
-  GdkPixbuf *icon;
-  GtkWidget *vbox;
-
-  /*GtkWidget *menubar;
-  GtkWidget *fileMenu;
-  GtkWidget *fileMi;
-  GtkWidget *quitMi;*/
-
   GtkWidget *filew;
 
   gtk_init(&argc, &argv);
 
-  window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title(GTK_WINDOW(window), "Simple Menu");
-  gtk_window_set_default_size(GTK_WINDOW(window), 600, 400);
-  gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-
-  vbox = gtk_vbox_new(FALSE, 0);
-  gtk_container_add(GTK_CONTAINER(window), vbox);
-
-  /*menubar = gtk_menu_bar_new();
-  fileMenu = gtk_menu_new();
-
-  fileMi = gtk_menu_item_new_with_label("File");
-  quitMi = gtk_menu_item_new_with_label("Quit");*/
-
-  filew = gtk_file_selection_new("File selection");
+  filew = gtk_file_selection_new("Select an Image");
 
   g_signal_connect(filew, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
@@ -207,23 +190,52 @@ int make_interface(int argc, char **argv)
   gtk_file_selection_set_filename(GTK_FILE_SELECTION(filew),
                                   "test.png");
 
-  /*gtk_menu_item_set_submenu(GTK_MENU_ITEM(fileMi), fileMenu);
-  gtk_menu_shell_append(GTK_MENU_SHELL(fileMenu), quitMi);
-  gtk_menu_shell_append(GTK_MENU_SHELL(menubar), fileMi);
-  gtk_box_pack_start(GTK_BOX(vbox), menubar, FALSE, FALSE, 0);*/
-
-  icon = create_pixbuf("/home/pierre/Downloads/icon_test.jpeg");
-  gtk_window_set_icon(GTK_WINDOW(window), icon);
-
-  g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(gtk_main_quit), NULL);
-
-  //g_signal_connect(G_OBJECT(quitMi), "activate", G_CALLBACK(gtk_main_quit), NULL);
-
   gtk_widget_show(filew);
 
-  gtk_widget_show_all(window);
+  gtk_main();
 
-  g_object_unref(icon);
+  return 0;
+}
+
+void file_save(GtkWidget *w, gpointer user_data)
+{
+  GtkWidget *file_selector = GTK_WIDGET(user_data);
+  const gchar *selected_filename;
+
+  w = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_title(GTK_WINDOW(w), "Bordel !");
+
+  selected_filename = gtk_file_selection_get_filename(GTK_FILE_SELECTION(file_selector));
+  g_print("Selected filename: %s\n", selected_filename);
+
+  outputFolder = (char *)selected_filename;
+}
+
+int save_interface(int argc, char **argv)
+{
+  GtkWidget *filew;
+
+  gtk_init(&argc, &argv);
+
+  filew = gtk_file_selection_new("Type the name of the save folder");
+
+  g_signal_connect(filew, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+  g_signal_connect(GTK_FILE_SELECTION(filew)->ok_button,
+                    "clicked", G_CALLBACK(file_save), filew);
+
+  g_signal_connect_swapped(GTK_FILE_SELECTION(filew)->ok_button,
+                          "clicked", G_CALLBACK(gtk_widget_destroy), 
+                          filew);
+
+  g_signal_connect_swapped(GTK_FILE_SELECTION(filew)->cancel_button,
+                            "clicked", G_CALLBACK(gtk_widget_destroy),
+                            filew);
+
+  gtk_file_selection_set_filename(GTK_FILE_SELECTION(filew),
+                                  "test.png");
+
+  gtk_widget_show(filew);
 
   gtk_main();
 
@@ -257,11 +269,9 @@ void save_characters(Img_array characters, char *file_name)
 
   struct stat st;
 
-  char *save_dir = concat(concat(dir, "/"), file_name);
-
-  if (stat(save_dir, &st) == -1)
+  if (stat(file_name, &st) == -1)
   {
-    mkdir(save_dir, 0700);
+    mkdir(file_name, 0700);
   }
 
   for (size_t i = 0; i < characters.used; i++)
@@ -269,13 +279,12 @@ void save_characters(Img_array characters, char *file_name)
     int index = i;
     char num[10];
     sprintf(num, "%d", index);
-    char *saveFile = concat(concat(save_dir, "/"), num);
+    char *saveFile = concat(concat(file_name, "/"), num);
     SDL_SaveBMP(characters.array[i], saveFile);
     char_to_matrix(characters.array[i], saveFile);
     //save_matrix(matrix, saveFile);
     free(saveFile);
   }
-  free(save_dir);
 }
 
 void char_to_matrix(SDL_Surface *chara, char *save)

@@ -72,7 +72,7 @@ Img_array column_image_blocking(Img_array lines)
     if (interCharSpace != 0)
     {
       SDL_Surface *space;
-      space = SDL_CreateRGBSurface(0, 20, 20, 32, 0, 0, 0, 0);
+      space = SDL_CreateRGBSurface(0, 24, 24, 32, 0, 0, 0, 0);
       SDL_FillRect(space, NULL, 0xFFFFFFFF);
       insert_array(&chars, space);
     }
@@ -91,7 +91,7 @@ Img_array column_image_blocking(Img_array lines)
             if (spaceEnd - spaceStart > interCharSpace * 2)
             {
               SDL_Surface *space;
-              space = SDL_CreateRGBSurface(0, 20, 20, 32, 0, 0, 0, 0);
+              space = SDL_CreateRGBSurface(0, 24, 24, 32, 0, 0, 0, 0);
               SDL_FillRect(space, NULL, 0xFFFFFFFF);
               insert_array(&chars, space);
             }
