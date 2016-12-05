@@ -74,7 +74,7 @@ Img_array column_image_blocking(Img_array lines)
       SDL_Surface *space;
       space = SDL_CreateRGBSurface(0, 24, 24, 32, 0, 0, 0, 0);
       SDL_FillRect(space, NULL, 0xFFFFFFFF);
-     // insert_array(&chars, space);
+      insert_array(&chars, space);
     }
     SDL_Surface *img = lines.array[line];
     for (int i = 0; i < img->w; i++)
@@ -93,7 +93,7 @@ Img_array column_image_blocking(Img_array lines)
               SDL_Surface *space;
               space = SDL_CreateRGBSurface(0, 24, 24, 32, 0, 0, 0, 0);
               SDL_FillRect(space, NULL, 0xFFFFFFFF);
-              //insert_array(&chars, space);
+              insert_array(&chars, space);
             }
           }
           else
@@ -120,7 +120,7 @@ Img_array column_image_blocking(Img_array lines)
             result = height_fix(result);
 
             SDL_Surface *scaleResult;
-            scaleResult = SDL_CreateRGBSurface(0, 20, 20, 32, 0, 0, 0, 0);
+            scaleResult = SDL_CreateRGBSurface(0, 22, 22, 32, 0, 0, 0, 0);
 
             if (result->h < result->w)
             {
@@ -138,7 +138,7 @@ Img_array column_image_blocking(Img_array lines)
             SDL_Surface *whiteSpace;
             whiteSpace = SDL_CreateRGBSurface(0, 24, 24, 32, 0, 0, 0, 0);
             SDL_FillRect(whiteSpace, NULL, 0xFFFFFFFF);
-            SDL_Rect rekt = {(24 - scaleResult->w) / 2, (24 - scaleResult->h) / 2, 20, 20};
+            SDL_Rect rekt = {(24 - scaleResult->w) / 2, (24 - scaleResult->h) / 2, 22, 22};
 
             SDL_BlitSurface(scaleResult, NULL, whiteSpace, &rekt);
 

@@ -189,11 +189,11 @@ for (epoch = 1;  LastRMSError > errorl &&    epoch <= 1000000;  epoch++) {
       }
       printf("Output values:");
 	int maxVal = 0;
-      	for (j = 0;  j < NUMOUTPUTS;  j++)
+      	for (int z = 0;  z < NUMOUTPUTS;  z++)
 	{
-        	if (ResultOutputVals[maxVal]<ResultOutputVals[j])
+        	if (ResultOutputVals[maxVal]<ResultOutputVals[z])
 		{
-			maxVal = j;
+			maxVal = z;
 		} 
 		//printf(" %f", ResultOutputVals[j]);
       	}

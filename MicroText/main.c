@@ -286,7 +286,7 @@ void save_characters(Img_array characters, char *file_name)
     
     //Thee cee should be written to file
    // cee++;
-    printf("%c ",cee) ;
+    printf("%c",cee) ;
     fprintf(fl,"l");
     
 
