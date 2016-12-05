@@ -126,8 +126,8 @@ if(DEBUG){printf("After Array init");}
    config.NumInputs = NUMINPUTS;
    config.NumHidden = NUMHIDDEN;
    config.NumOutputs = NUMOUTPUTS;
-   config.StepSize = 0.25;
-   config.Momentum = 0.90;
+   config.StepSize = 0.5;
+   config.Momentum = 0.5;
    config.Cost = 0.0; 
 
    if(DEBUG){printf("Net Init\n");}

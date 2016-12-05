@@ -320,7 +320,7 @@ char char_to_matrix(SDL_Surface *chara, char *save)
 	InputArray[0][i*chara->w +j] = 0.0;
       }
     }
-   // fprintf(f, "\n"); Removed For training BY Remo 
+    fprintf(f, "\n"); //Removed For training BY Remo 
   }
   fclose(f);
   char c = getChar(InputArray);

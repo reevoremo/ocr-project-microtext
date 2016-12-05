@@ -14,12 +14,12 @@
 #define sigmoid(x)           (1.0 / (1.0 + (float)exp(-(double)(x))))
 #define sigmoidDerivative(x) ((float)(x)*(1.0-(x))) 
 /* random() for -1 to +1 */
-#define random()             ((((float)rand()/(RAND_MAX)) * 2.0) - 1.0)
+#define random()           (((float)rand()/(RAND_MAX)) - 0.5) /* ((((float)rand()/(RAND_MAX)) * 2.0) - 1.0)*/ 
 
 
 
-#define DYNAMIC_LEARNING 0 
-#define CMDIFFSTEPSIZE 1
+#define DYNAMIC_LEARNING 1 
+#define CMDIFFSTEPSIZE 1 
 
 
 #ifndef DEBUG
@@ -262,6 +262,7 @@ int learn(network_t *n, int ntimes)
             }
          } else {
             n->NumConsecConverged = 0;
+	    n->StepSize += 0.04; //Man ADD	
          }
       }
       n->PrevRMSError = n->LastRMSError;

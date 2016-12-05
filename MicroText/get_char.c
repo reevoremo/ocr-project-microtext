@@ -149,7 +149,7 @@ for (epoch = 1;  LastRMSError > 0.05  &&  epoch <= 1000000;  epoch++) {
    printf("=======================================================\n");
   }
    destroy_network(net);
-   char c = (char)(maxVal +33);
+   char c = (char)(maxVal +34);
    return c;
   // return 0;
 }
