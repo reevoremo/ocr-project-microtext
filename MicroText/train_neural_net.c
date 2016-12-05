@@ -19,9 +19,9 @@
 
 #define NUMINPUTS      576 /* number of input units */
 #define NUMHIDDEN      576 /* number of hidden units */
-#define NUMOUTPUTS     90 /* number of output units */
-#define NUMINTRAINSET  90 /* number of values/epochs in the training set */
-#define NUMOFEVALS     90 /* number of values in the test set */
+#define NUMOUTPUTS     89 /* number of output units */
+#define NUMINTRAINSET  89 /* number of values/epochs in the training set */
+#define NUMOFEVALS     89 /* number of values in the test set */
 
 /*
 static float InputVals[NUMINTRAINSET][NUMINPUTS] = {
@@ -93,13 +93,13 @@ int fillArrays(float InputVals[][NUMINPUTS], float TargetVals[][NUMOUTPUTS], flo
 int main(int argc, char **argv)
 {
 
-if (argc!=2)
+if (argc!=3)
 {
 	printf("Invalid number of arguments\n");
 	return 1;
 }
 int ar = atoi(argv[1]);
-
+float errorl = atof(argv[2]);
 printf("%d\n",ar);
 
 float InputVals[NUMINTRAINSET][NUMINPUTS];
@@ -156,7 +156,7 @@ if(DEBUG){printf("After Array init");}
 
 if(DEBUG){printf("Next: Epoch Start\n");}
 if (ar==1){
-for (epoch = 1;  LastRMSError > 0.05  &&  epoch <= 1000000;  epoch++) {
+for (epoch = 1;  LastRMSError > errorl &&    epoch <= 1000000;  epoch++) {
 	if(DEBUG){printf("Learning Loop: %d RMSError: %f\n", epoch,LastRMSError);}
       	if (learn(net, 1) == -1)
 	{
@@ -197,7 +197,7 @@ for (epoch = 1;  LastRMSError > 0.05  &&  epoch <= 1000000;  epoch++) {
 		} 
 		//printf(" %f", ResultOutputVals[j]);
       	}
-	printf("%c " , maxVal  + 33);
+	printf("%c " , maxVal  + 34);
 	printf("\n");
    }
 if (ar==1){

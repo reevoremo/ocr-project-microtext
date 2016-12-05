@@ -74,7 +74,7 @@ Img_array column_image_blocking(Img_array lines)
       SDL_Surface *space;
       space = SDL_CreateRGBSurface(0, 24, 24, 32, 0, 0, 0, 0);
       SDL_FillRect(space, NULL, 0xFFFFFFFF);
-      insert_array(&chars, space);
+     // insert_array(&chars, space);
     }
     SDL_Surface *img = lines.array[line];
     for (int i = 0; i < img->w; i++)
@@ -93,7 +93,7 @@ Img_array column_image_blocking(Img_array lines)
               SDL_Surface *space;
               space = SDL_CreateRGBSurface(0, 24, 24, 32, 0, 0, 0, 0);
               SDL_FillRect(space, NULL, 0xFFFFFFFF);
-              insert_array(&chars, space);
+              //insert_array(&chars, space);
             }
           }
           else

@@ -19,7 +19,7 @@
 
 #define NUMINPUTS      576 /* number of input units */
 #define NUMHIDDEN      576 /* number of hidden units */
-#define NUMOUTPUTS     90 /* number of output units */
+#define NUMOUTPUTS     89 /* number of output units */
 #define NUMINTRAINSET  1 /* number of values/epochs in the training set */
 #define NUMOFEVALS     1 /* number of values in the test set */
 
@@ -137,7 +137,7 @@ for (epoch = 1;  LastRMSError > 0.05  &&  epoch <= 1000000;  epoch++) {
 		printf(" %f\n", ResultOutputVals[j]);}
       	}
 	if(DEBUG){
-	printf("%c " , maxVal  + 33);
+	printf("%c " , maxVal  + 34);
 	printf("\n");}
 
  /*  if (savetofile(net, "English-Basic.txt")!=0)
