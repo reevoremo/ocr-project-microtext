@@ -10,7 +10,7 @@
 # include <gtk/gtk.h>
 
 # include "pixel_operations.h"
-
+# include "get_char.h"
 # include "image_blocking.h"
 
 # include "main.h"
@@ -293,6 +293,9 @@ void char_to_matrix(SDL_Surface *chara, char *save)
 
   FILE *f = fopen(saveFile, "w");
   
+	
+  float InputArray[1][576];
+   
   for (int i = 0; i < chara->h; i++)
   {
     for (int j = 0; j < chara->w; j++)
@@ -301,15 +304,19 @@ void char_to_matrix(SDL_Surface *chara, char *save)
       if (pixel == 0)
       {
         fprintf(f, "1");
+	InputArray[0][i*chara->w +j] = 1.0;
       }
       else
       {
         fprintf(f, "0");
+	InputArray[0][i*chara->w +j] = 0.0;
       }
     }
    // fprintf(f, "\n"); Removed For training BY Remo 
   }
   fclose(f);
+  char c = getChar(InputArray);
+  printf("%c", c);
 }
 
 

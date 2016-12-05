@@ -4,6 +4,10 @@
 #include <errno.h>
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 #include "neural_netX.h"
 
 /* The following sigmoid returns values from 0.0 to 1.0 */
@@ -13,10 +17,14 @@
 #define random()             ((((float)rand()/(RAND_MAX)) * 2.0) - 1.0)
 
 
+
 #define DYNAMIC_LEARNING 0 
 #define CMDIFFSTEPSIZE 1
 
 
+#ifndef DEBUG
+#define DEBUG 1
+#endif
 static void setup_all(network_t *n);
 static void forward(network_t *n);
 static void backward(network_t *n);
@@ -191,10 +199,14 @@ int learn(network_t *n, int ntimes)
    int item, run;
 
    if (!n) {
+      if(DEBUG){printf("Network is Null\n");}
+
       errno = ENOENT;
       return -1;
    }
    if (n->NumInTrainSet == 0) {
+      if(DEBUG){printf("Training set NUll\n");}
+
       errno = ESRCH;
       return -1;
    }
@@ -425,17 +437,22 @@ int set_output(network_t *n, int setall, float val, float *soutputvals)
 }
 
 /* Executed after trainning to get results */
-int evaluate(network_t *n, float *eoutputvals, int sizeofoutputvals)
+int evaluate(network_t *n, float *eoutputvals, size_t sizeofoutputvals)
 {  
    if (!n) {
+      if(DEBUG){printf("Network Empty \n");}
       errno = ENOENT;
       return -1;
+
    }
    if (!n->InputReady) {
+	if(DEBUG){printf("InputReady 0 \n");}
       errno = ESRCH;
       return -1;
    }
    if (!n->Learned) {
+	if(DEBUG){printf("Learned 0 \n");}
+
       errno = ENODEV;
       return -1;
    }
@@ -453,5 +470,164 @@ int evaluate(network_t *n, float *eoutputvals, int sizeofoutputvals)
       memcpy(eoutputvals, n->OutputVals, n->NumOutputs*sizeof(float));
    }
    return 0;
+}
+
+
+/* Save Trained data to file */
+
+int savetofile(network_t *n, char *fname)
+{
+   int fd, returncode;
+
+   returncode = -1;
+
+   fd = open(fname, O_WRONLY | O_CREAT | O_TRUNC,
+         S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+   if (fd == -1)
+      return returncode;
+
+   if (write(fd, (int *) &n->NumInputs, sizeof(int)) == -1)
+      goto cleanupandret;
+   if (write(fd, (int *) &n->NumHidden, sizeof(int)) == -1)
+      goto cleanupandret;
+   if (write(fd, (int *) &n->NumOutputs, sizeof(int)) == -1)
+      goto cleanupandret;
+   if (write(fd, (int *) &n->NumBias, sizeof(int)) == -1)
+      goto cleanupandret;
+
+   if (write(fd, (int *) &n->InputReady, sizeof(int)) == -1)
+      goto cleanupandret;
+   if (write(fd, (int *) &n->DesiredOutputReady, sizeof(int)) == -1)
+      goto cleanupandret;
+   if (write(fd, (int *) &n->Learned, sizeof(int)) == -1)
+      goto cleanupandret;
+
+   if (write(fd, n->InputVals, n->NumInputs * sizeof(float)) == -1)
+      goto cleanupandret;
+   if (write(fd, n->DesiredOutputVals, n->NumOutputs * sizeof(float)) == -1)
+      goto cleanupandret;
+   if (write(fd, n->IHWeights, n->NumInputs * n->NumHidden * sizeof(float)) == -1)
+      goto cleanupandret;
+   if (write(fd, n->PrevDeltaIH, n->NumInputs * n->NumHidden * sizeof(float)) == -1)
+      goto cleanupandret;
+   if (write(fd, n->PrevDeltaHO, n->NumHidden * n->NumOutputs * sizeof(float)) == -1)
+      goto cleanupandret;
+   if (write(fd, n->PrevDeltaBH, n->NumBias * n->NumHidden * sizeof(float)) == -1)
+      goto cleanupandret;
+   if (write(fd, n->PrevDeltaBO, n->NumBias * n->NumOutputs * sizeof(float)) == -1)
+      goto cleanupandret;
+   if (write(fd, n->HiddenVals, n->NumHidden * sizeof(float)) == -1)
+      goto cleanupandret;
+   if (write(fd, n->HiddenBetas, n->NumHidden * sizeof(float)) == -1)
+      goto cleanupandret;
+   if (write(fd, n->HOWeights, n->NumHidden * n->NumOutputs * sizeof(float)) == -1)
+      goto cleanupandret;
+   if (write(fd, n->BiasVals, n->NumBias * sizeof(float)) == -1)
+      goto cleanupandret;
+   if (write(fd, n->BHWeights, n->NumBias * n->NumHidden * sizeof(float)) == -1)
+      goto cleanupandret;
+   if (write(fd, n->BOWeights, n->NumBias * n->NumOutputs * sizeof(float)) == -1)
+      goto cleanupandret;
+   if (write(fd, n->OutputVals, n->NumOutputs * sizeof(float)) == -1)
+      goto cleanupandret;
+   if (write(fd, n->OutputBetas, n->NumOutputs * sizeof(float)) == -1)
+      goto cleanupandret;
+ returncode = 0;
+
+cleanupandret:
+   close(fd);
+
+   return returncode;
+}
+
+/* Load From File */ 
+int loadfromfile(network_t **n, char *fname)
+{
+   if(DEBUG){printf("Started Loading\n");}
+
+   int fd, returncode;
+   config_t config;
+
+   returncode = -1;
+   if(DEBUG){printf("x");}
+   config.NumInputs = (*n)->NumInputs;
+   config.NumHidden = (*n)->NumHidden;
+   config.NumOutputs = (*n)->NumOutputs;
+   config.StepSize = (*n)->StepSize;
+   config.Momentum = (*n)->Momentum;
+   config.Cost = (*n)->Cost;
+
+   if (create_network(n, &config) == -1)
+      return returncode;
+
+   if ((fd = open(fname, O_RDONLY)) == -1)
+      return returncode;
+    
+
+
+
+
+
+
+   (*n)->InputVals = (*n)->GivenInputVals;
+   (*n)->DesiredOutputVals = (*n)->GivenDesiredOutputVals;
+  // (*n)->NumInTrainSet = 5;
+   if (read(fd, (int *) &(*n)->NumInputs, sizeof(int)) == -1)
+      goto errandret;
+   if (read(fd, (int *) &(*n)->NumHidden, sizeof(int)) == -1)
+      goto errandret;
+   if (read(fd, (int *) &(*n)->NumOutputs, sizeof(int)) == -1)
+      goto errandret;
+   if (read(fd, (int *) &(*n)->NumBias, sizeof(int)) == -1)
+      goto errandret;
+
+   if (read(fd, (int *) &(*n)->InputReady, sizeof(int)) == -1)
+      goto errandret;
+   if (read(fd, (int *) &(*n)->DesiredOutputReady, sizeof(int)) == -1)
+      goto errandret;
+   if (read(fd, (int *) &(*n)->Learned, sizeof(int)) == -1)
+      goto errandret;
+
+   if (read(fd, (*n)->InputVals, (*n)->NumInputs * sizeof(float)) == -1)
+      goto errandret;
+   if (read(fd, (*n)->DesiredOutputVals, (*n)->NumOutputs * sizeof(float)) == -1)
+      goto errandret;
+   if (read(fd, (*n)->IHWeights, (*n)->NumInputs * (*n)->NumHidden * sizeof(float)) == -1)
+      goto errandret;
+   if (read(fd, (*n)->PrevDeltaIH, (*n)->NumInputs * (*n)->NumHidden * sizeof(float)) == -1)
+      goto errandret;
+   if (read(fd, (*n)->PrevDeltaHO, (*n)->NumHidden * (*n)->NumOutputs * sizeof(float)) == -1)
+      goto errandret;
+   if (read(fd, (*n)->PrevDeltaBH, (*n)->NumBias * (*n)->NumHidden * sizeof(float)) == -1)
+      goto errandret;
+   if (read(fd, (*n)->PrevDeltaBO, (*n)->NumBias * (*n)->NumOutputs * sizeof(float)) == -1)
+      goto errandret;
+   if (read(fd, (*n)->HiddenVals, (*n)->NumHidden * sizeof(float)) == -1)
+      goto errandret;
+   if (read(fd, (*n)->HiddenBetas, (*n)->NumHidden * sizeof(float)) == -1)
+      goto errandret;
+   if (read(fd, (*n)->HOWeights, (*n)->NumHidden * (*n)->NumOutputs * sizeof(float)) == -1)
+      goto errandret;
+   if (read(fd, (*n)->BiasVals, (*n)->NumBias * sizeof(float)) == -1)
+      goto errandret;
+   if (read(fd, (*n)->BHWeights, (*n)->NumBias * (*n)->NumHidden * sizeof(float)) == -1)
+      goto errandret;
+   if (read(fd, (*n)->BOWeights, (*n)->NumBias * (*n)->NumOutputs * sizeof(float)) == -1)
+      goto errandret;
+   if (read(fd, (*n)->OutputVals, (*n)->NumOutputs * sizeof(float)) == -1)
+      goto errandret;
+   if (read(fd, (*n)->OutputBetas, (*n)->NumOutputs * sizeof(float)) == -1)
+      goto errandret;
+
+   returncode = 0;
+   goto cleanupandret;
+
+errandret:
+   destroy_network(*n);
+
+cleanupandret:
+   close(fd);
+
+   return returncode;
 }
 

@@ -10,11 +10,11 @@
 #define DEBUG 1
 #endif
 
-static int verbose = 3;
 
-static void print_all_network_info(int epoch);
-//static int get_number(float *vals);
-static int parse_args(int argc, char **argv);
+
+
+
+
 
 
 #define NUMINPUTS      576 /* number of input units */
@@ -63,46 +63,64 @@ char* concat(const char *s1, const char *s2)
   return result;
 }
 
+/* Fill Arrays  */
+int fillArrays(float InputVals[][NUMINPUTS], float TargetVals[][NUMOUTPUTS], float TestInputVals[][NUMINPUTS])
+{
+	FILE *myFile;
+	float f;
+	for (int fn = 0 ;fn < NUMINTRAINSET;fn++)
+	{
+		char buf[12];
+        	sprintf(buf, "%d.txt", fn);
+		myFile = fopen(concat("train.bmp/",buf), "r");
+	        for (int k = 0; k < 576; k++)
+        	{
+			fscanf(myFile, "%1f", &f);
+			InputVals[fn][k] = f;
+                	TestInputVals[fn][k] = f;
+        	}
+		
+		for (int k = 0; k < 576; k++)
+      		{
+              		printf("%d-%d  Num is: %f\n\n",fn,k, InputVals[fn][k]);
+      		}
+	
+        	TargetVals[fn][fn]=1.0;		
+	}
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
 
+if (argc!=2)
+{
+	printf("Invalid number of arguments\n");
+	return 1;
+}
+int ar = atoi(argv[1]);
+
+printf("%d\n",ar);
 
 float InputVals[NUMINTRAINSET][NUMINPUTS];
 float TargetVals[NUMINTRAINSET][NUMOUTPUTS];
 float TestInputVals[NUMOFEVALS][NUMINPUTS];
+memset(TargetVals, 0, sizeof TargetVals);
+if(DEBUG){printf("After Array init");}
 
-
-
-FILE *myFile;
-for (int fn = 0 ;fn < NUMINTRAINSET;fn++){
-
-	char buf[12];
-      	sprintf(buf, "%d.txt", fn); // puts string into buffer
-//      	printf("%s\n", buf); // outputs so you can see it
-   	
- 	//char *openFile = );    
-    	myFile = fopen(concat("train.bmp/",buf), "r");
-
-
-	for (int k = 0; k < 576; k++)
+	if (fillArrays(InputVals,TargetVals,TestInputVals)!=0)
 	{
-        	fscanf(myFile, "%1f", &InputVals[fn][k]);
-		TestInputVals[fn][k] = InputVals[fn][k];
+		printf("Failed to Fill Arrays");
+		return 1;
 	}
-//	for (int k = 0; k < 576; k++)
-//	{
- //       	printf("Num is: %f\n\n", InputVals[fn][k]);
-//	}
-	TargetVals[fn][fn]=1.0;
-}
-
 
    int i, j, epoch;//fd
    network_t *net;
    config_t config;
 
-   if (parse_args(argc, argv) == -1)
-      exit(EXIT_FAILURE);
+
+
+
 
   // config.Type = BACKPROP_TYPE_NORMAL;
    config.NumInputs = NUMINPUTS;
@@ -110,68 +128,50 @@ for (int fn = 0 ;fn < NUMINTRAINSET;fn++){
    config.NumOutputs = NUMOUTPUTS;
    config.StepSize = 0.25;
    config.Momentum = 0.90;
-   config.Cost = 0.0;
+   config.Cost = 0.0; 
+
+   if(DEBUG){printf("Net Init\n");}
+
+
    if (create_network(&net, &config) == -1) {
       perror("create_network() failed");
       exit(EXIT_FAILURE);
    }
-
-   if (set_training_set(net, NUMINTRAINSET, (float *) InputVals, (float *) TargetVals) == -1) {
-      perror("set_training_set() failed");
-      exit(EXIT_FAILURE);
-   }
+   
+	if (set_training_set(net, NUMINTRAINSET, (float *) InputVals, (float *) TargetVals) == -1) {
+      		perror("set_training_set() failed");
+      		exit(EXIT_FAILURE);
+   	}
 
    LastRMSError = 99;
+   if(ar==0){
+	if(DEBUG){printf("Load Initiated\n");}
 
+	if(loadfromfile(&net,"English-Basic.txt")!=-1)
+	{printf("Loaded Successfully\n");}
+	else
+	{printf("Failed to Load"); return 1;}
+	
+   }
 
-
-   for (epoch = 1;  LastRMSError > 0.05  &&  epoch <= 1000000;  epoch++) {
+if(DEBUG){printf("Next: Epoch Start\n");}
+if (ar==1){
+for (epoch = 1;  LastRMSError > 0.05  &&  epoch <= 1000000;  epoch++) {
 	if(DEBUG){printf("Learning Loop: %d RMSError: %f\n", epoch,LastRMSError);}
-      if (learn(net, 1) == -1) {
-         perror("learn() failed");
-         exit(EXIT_FAILURE);
-      }
-      if (verbose <= 1) {
-       /*  if (query(net, NULL, &LastRMSError, NULL,
-               NULL, NULL, NULL, NULL, NULL, NULL, NULL) == -1) {
-            perror("bkp_query() failed");
-         }*/
-      } else  if (verbose == 2) {
-         /* The following prints everything in the neural network for
-            each step during the learning. It's just to illustrate
-            that you can examine everything that's going on in order to
-            debug or fine tune the network.
-            Warning: Doing all this printing will slow things down
-            significantly.  */
-        /*  if (query(net, &LastLearningError, &LastRMSError, ResultInputVals,
-               ResultIHWeights, ResultHiddenVals, ResultHOWeights, 
-               ResultOutputVals,
-               ResultBHWeights, ResultBiasVals, ResultBOWeights) == -1) {
-            perror("bkp_query() failed");
-         }*/
-         print_all_network_info(epoch);
-      }
-        LastRMSError = net->LastRMSError;
-   }
-
-
- if (verbose == 1) {
-      /* The following prints everything in the neural network after
-         the last learned training set. */
-     /* if (query(net, &LastLearningError, &LastRMSError, ResultInputVals,
-            ResultIHWeights, ResultHiddenVals, ResultHOWeights, 
-            ResultOutputVals,
-            ResultBHWeights, ResultBiasVals, ResultBOWeights) == -1) {
-         perror("bkp_query() failed");
-      }*/
-      print_all_network_info(epoch);
-   }
+      	if (learn(net, 1) == -1)
+	{
+        	perror("learn() failed");
+         	exit(EXIT_FAILURE);
+      	}
+       	LastRMSError = net->LastRMSError;
+}
 
    printf("Stopped learning at epoch: %d, RMS Error: %f.\n",
-      epoch-1, LastRMSError);
+   epoch-1, LastRMSError);
 
    printf("\n");
    printf("=======================================================\n");
+}
    for (i = 0;  i < NUMOFEVALS;  i++) {
       printf("Evaluating inputs:");
       for (j = 0;  j < 1;  j++)
@@ -200,60 +200,14 @@ for (int fn = 0 ;fn < NUMINTRAINSET;fn++){
 	printf("%c " , maxVal  + 33);
 	printf("\n");
    }
-
+if (ar==1){
+   if (savetofile(net, "English-Basic.txt")!=0)
+	{printf("Failed to save data");}
+   else {printf("Saved!");}
+}
 
 
    printf("=======================================================\n");
    destroy_network(net);
    return 0;
 }
-
-static void print_all_network_info(int epoch)
-{
-   int j;
-
-   printf("Epoch: %d  RMS Error: %f  Learning Error: %f\nInput values: ",
-         epoch, LastRMSError, LastLearningError);
-   for (j = 0;  j < NUMINPUTS;  j++)
-      printf("%f ", ResultInputVals[j]);
-   printf("\nInput to Hidden Weights: ");
-   for (j = 0;  j < NUMINPUTS*NUMHIDDEN;  j++)
-      printf("%f ", ResultIHWeights[j]);
-   printf("\nHidden unit values: ");
-   for (j = 0;  j < NUMHIDDEN;  j++)
-      printf("%f ", ResultHiddenVals[j]);
-   printf("\nHidden to Output Weights: ");
-   for (j = 0;  j < NUMHIDDEN*NUMOUTPUTS;  j++)
-      printf("%f ", ResultHOWeights[j]);
-   printf("\nLast Outputs values for the last Epoch: ");
-   for (j = 0;  j < NUMOUTPUTS;  j++)
-      printf("%f ", ResultOutputVals[j]);
-   printf("\nBias to Hidden Weights: ");
-   for (j = 0;  j < 1*NUMHIDDEN;  j++)
-      printf("%f ", ResultBHWeights[j]);
-   printf("\nBias unit values: ");
-   for (j = 0;  j < 1;  j++)
-      printf("%f ", ResultBiasVals[j]);
-   printf("\nBias to Output Weights: ");
-   for (j = 0;  j < 1*NUMOUTPUTS;  j++)
-      printf("%f ", ResultBOWeights[j]);
-   printf("\n\n");
-}
-
-static int parse_args(int argc, char **argv)
-{
-   int c;
-
-   while ((c = getopt(argc, argv, "v")) != -1) {
-      switch (c) {
-      case 'v': verbose++; break;
-      case '?': exit(EXIT_FAILURE);
-      }
-   }
-   if (argv[optind] != NULL) {
-      fprintf(stderr, "Invalid argument.\n");
-      return -1;
-   }
-   return 0;
-}
-

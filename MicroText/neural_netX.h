@@ -83,7 +83,7 @@ void destroy_network(network_t *n);
 int set_training_set(network_t *n, int ntrainset, float *tinputvals, float *targetvals);
 void clear_training_set(network_t *n);
 int learn(network_t *n, int ntimes);
-int evaluate(network_t *n, float *eoutputvals, int sizeofoutputvals);
+int evaluate(network_t *n, float *eoutputvals, size_t sizeofoutputvals);
 int query(network_t *n,
       float *qlastlearningerror, float *qlastrmserror,
         float *qinputvals, float *qihweights, float *qhiddenvals,
