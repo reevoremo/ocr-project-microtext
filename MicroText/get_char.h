@@ -4,6 +4,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-char getChar(float InputArray[][NUMINPUTS]);
+char  getChar(float InputArray[][NUMINPUTS]);
 
 #endif

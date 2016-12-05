@@ -23,7 +23,7 @@
 
 
 #ifndef DEBUG
-#define DEBUG 1
+#define DEBUG 0
 #endif
 static void setup_all(network_t *n);
 static void forward(network_t *n);

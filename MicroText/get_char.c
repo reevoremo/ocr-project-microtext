@@ -7,7 +7,7 @@
 #include <string.h>
 #include "get_char.h"
 #ifndef DEBUG
-#define DEBUG 1
+#define DEBUG 0 
 #endif
 
 
@@ -36,45 +36,10 @@ float ResultBiasVals[1];
 float ResultBOWeights[1*NUMOUTPUTS];
 
 
-
-/* Fill Arrays  */
-/*
-int fillArrays(float InputVals[][NUMINPUTS], float TargetVals[][NUMOUTPUTS], float TestInputVals[][NUMINPUTS])
-{
-	FILE *myFile;
-	float f;
-	for (int fn = 0 ;fn < NUMINTRAINSET;fn++)
-	{
-		char buf[12];
-        	sprintf(buf, "%d.txt", fn);
-		myFile = fopen(concat("train.bmp/",buf), "r");
-	        for (int k = 0; k < 576; k++)
-        	{
-			fscanf(myFile, "%1f", &f);
-			InputVals[fn][k] = f;
-                	TestInputVals[fn][k] = f;
-        	}
-		
-		for (int k = 0; k < 576; k++)
-      		{
-              		printf("%d-%d  Num is: %f\n\n",fn,k, InputVals[fn][k]);
-      		}
-	
-        	TargetVals[fn][fn]=1.0;		
-	}
-	return 0;
-}
-*/
 char getChar(float InputArray[][NUMINPUTS])
 {
 
-//int ar = atoi(argv[1]);
-
-//printf("%d\n",ar);
-
-//float InputVals[NUMINTRAINSET][NUMINPUTS];
 float TargetVals[NUMINTRAINSET][NUMOUTPUTS];
-//float TestInputVals[NUMOFEVALS][NUMINPUTS];
 memset(TargetVals, 0, sizeof TargetVals);
 if(DEBUG)
 {
@@ -92,15 +57,7 @@ if(DEBUG)
 		}
 	}	
 }
-/*
-	if (fillArrays(InputVals,TargetVals,TestInputVals)!=0)
-	{
-		printf("Failed to Fill Arrays");
-		return 1;
-	}
-*/
-//   int i, j, epoch;//fd
-   network_t *net;
+  network_t *net;
    config_t config;
 
 
@@ -133,9 +90,9 @@ if(DEBUG)
 	if(DEBUG){printf("Load Initiated\n");}
 
 	if(loadfromfile(&net,"English-Basic.txt")!=-1)
-	{printf("Loaded Successfully");}
+	{if(DEBUG){printf("Loaded Successfully");}}
 	else
-	{printf("Failed to Load"); return 1;}
+	{if(DEBUG){printf("Failed to Load"); return '\0';}}
 	
 
 
@@ -168,8 +125,7 @@ for (epoch = 1;  LastRMSError > 0.05  &&  epoch <= 1000000;  epoch++) {
       if (evaluate(net, ResultOutputVals, NUMOUTPUTS*sizeof(float)) == -1) {
          perror("evaluate() failed");
          exit(EXIT_FAILURE);
-      }
-      printf("Output values:");
+      }     
 	int maxVal = 0;
       	for (int j = 0;  j < NUMOUTPUTS;  j++)
 	{
@@ -177,20 +133,23 @@ for (epoch = 1;  LastRMSError > 0.05  &&  epoch <= 1000000;  epoch++) {
 		{
 			maxVal = j;
 		} 
-		printf(" %f\n", ResultOutputVals[j]);
+		if(DEBUG){
+		printf(" %f\n", ResultOutputVals[j]);}
       	}
+	if(DEBUG){
 	printf("%c " , maxVal  + 33);
-	printf("\n");
+	printf("\n");}
 
  /*  if (savetofile(net, "English-Basic.txt")!=0)
 	{printf("Failed to save data");}
    else {printf("Saved!");}
 */
 
-
+   if(DEBUG){
    printf("=======================================================\n");
-  
- destroy_network(net);
-	return (maxVal +33);
+  }
+   destroy_network(net);
+   char c = (char)(maxVal +33);
+   return c;
   // return 0;
 }

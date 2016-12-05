@@ -9,7 +9,7 @@ void save_characters(Img_array characters, char *file_name);
 
 char* concat(const char *s1, const char *s2);
 
-void char_to_matrix(SDL_Surface *chara, char *save);
+char char_to_matrix(SDL_Surface *chara, char *save);
 
 int load_interface(int argc, char **argv);
 

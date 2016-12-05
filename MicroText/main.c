@@ -18,7 +18,7 @@
 char *inputFile;
 char *outputFolder;
 
-#define DEBUG 1 //If set to one, prints current task. Can be used to detect problems
+#define DEBUG 0 //If set to one, prints current task. Can be used to detect problems
 void wait_for_keypressed(void) {
   SDL_Event             event;
   // Infinite loop, waiting for event
@@ -273,7 +273,8 @@ void save_characters(Img_array characters, char *file_name)
   {
     mkdir(file_name, 0700);
   }
-
+  FILE *fl = fopen("output.txt", "w");
+  
   for (size_t i = 0; i < characters.used; i++)
   {
     int index = i;
@@ -281,13 +282,20 @@ void save_characters(Img_array characters, char *file_name)
     sprintf(num, "%d", index);
     char *saveFile = concat(concat(file_name, "/"), num);
     SDL_SaveBMP(characters.array[i], saveFile);
-    char_to_matrix(characters.array[i], saveFile);
-    //save_matrix(matrix, saveFile);
+    char cee = char_to_matrix(characters.array[i], saveFile);
+    
+    //Thee cee should be written to file
+   // cee++;
+    printf("%c ",cee) ;
+    fprintf(fl,"l");
+    
+
     free(saveFile);
   }
+  fclose(fl);
 }
 
-void char_to_matrix(SDL_Surface *chara, char *save)
+char char_to_matrix(SDL_Surface *chara, char *save)
 {
   char *saveFile = concat(save, ".txt");
 
@@ -316,7 +324,8 @@ void char_to_matrix(SDL_Surface *chara, char *save)
   }
   fclose(f);
   char c = getChar(InputArray);
-  printf("%c", c);
+  //printf("%c", c);
+ return c;
 }
 
 
