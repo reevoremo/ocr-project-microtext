@@ -120,16 +120,30 @@ int main(int argc, char **argv)
   
 }
 
+void file_get(GtkWidget *w, gpointer user_data)
+{
+  GtkWidget *file_selector = GTK_WIDGET(user_data);
+  const gchar *selected_filename;
+
+  w = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_title(GTK_WINDOW(w), "Bordel !");
+
+  selected_filename = gtk_file_selection_get_filename(GTK_FILE_SELECTION(file_selector));
+  g_print("Selected filename: %s\n", selected_filename);
+}
+
 int make_interface(int argc, char **argv)
 {
   GtkWidget *window;
-  //GdkPixbuf *icon;
+  GdkPixbuf *icon;
   GtkWidget *vbox;
 
-  GtkWidget *menubar;
+  /*GtkWidget *menubar;
   GtkWidget *fileMenu;
   GtkWidget *fileMi;
-  GtkWidget *quitMi;
+  GtkWidget *quitMi;*/
+
+  GtkWidget *filew;
 
   gtk_init(&argc, &argv);
 
@@ -141,27 +155,47 @@ int make_interface(int argc, char **argv)
   vbox = gtk_vbox_new(FALSE, 0);
   gtk_container_add(GTK_CONTAINER(window), vbox);
 
-  menubar = gtk_menu_bar_new();
+  /*menubar = gtk_menu_bar_new();
   fileMenu = gtk_menu_new();
 
   fileMi = gtk_menu_item_new_with_label("File");
-  quitMi = gtk_menu_item_new_with_label("Quit");
+  quitMi = gtk_menu_item_new_with_label("Quit");*/
 
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(fileMi), fileMenu);
+  filew = gtk_file_selection_new("File selection");
+
+  g_signal_connect(filew, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+  g_signal_connect(GTK_FILE_SELECTION(filew)->ok_button,
+                    "clicked", G_CALLBACK(file_get), filew);
+
+  g_signal_connect_swapped(GTK_FILE_SELECTION(filew)->ok_button,
+                          "clicked", G_CALLBACK(gtk_widget_destroy), 
+                          filew);
+
+  g_signal_connect_swapped(GTK_FILE_SELECTION(filew)->cancel_button,
+                            "clicked", G_CALLBACK(gtk_widget_destroy),
+                            filew);
+
+  gtk_file_selection_set_filename(GTK_FILE_SELECTION(filew),
+                                  "test.png");
+
+  /*gtk_menu_item_set_submenu(GTK_MENU_ITEM(fileMi), fileMenu);
   gtk_menu_shell_append(GTK_MENU_SHELL(fileMenu), quitMi);
   gtk_menu_shell_append(GTK_MENU_SHELL(menubar), fileMi);
-  gtk_box_pack_start(GTK_BOX(vbox), menubar, FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(vbox), menubar, FALSE, FALSE, 0);*/
 
-  //icon = create_pixbuf("/home/pierre/Downloads/icon_test.jpeg");
-  //gtk_window_set_icon(GTK_WINDOW(window), icon);
+  icon = create_pixbuf("/home/pierre/Downloads/icon_test.jpeg");
+  gtk_window_set_icon(GTK_WINDOW(window), icon);
 
   g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
-  g_signal_connect(G_OBJECT(quitMi), "activate", G_CALLBACK(gtk_main_quit), NULL);
+  //g_signal_connect(G_OBJECT(quitMi), "activate", G_CALLBACK(gtk_main_quit), NULL);
+
+  gtk_widget_show(filew);
 
   gtk_widget_show_all(window);
 
-  //g_object_unref(icon);
+  g_object_unref(icon);
 
   gtk_main();
 

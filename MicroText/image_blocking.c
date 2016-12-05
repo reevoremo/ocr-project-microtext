@@ -57,18 +57,51 @@ Img_array column_image_blocking(Img_array lines)
 
   init_array(&chars, 5);
 
+  int spaceStart = 0;
+  int spaceEnd = 0;
+  int interCharSpace = 0;
+
   for (size_t line = 0; line < lines.used; line++)
   {
+    if (interCharSpace != 0)
+    {
+      SDL_Surface *space;
+      space = SDL_CreateRGBSurface(0, 20, 20, 32, 0, 0, 0, 0);
+      SDL_FillRect(space, NULL, 0xFFFFFFFF);
+      insert_array(&chars, space);
+    }
     SDL_Surface *img = lines.array[line];
     for (int i = 0; i < img->w; i++)
     {
       if (is_full_column(img, i) == 0)
       {
         int start = i;
+        spaceEnd = i;
+
+        if (spaceStart != 0)
+        {
+          if (interCharSpace != 0)
+          {
+            if (spaceEnd - spaceStart > interCharSpace * 2)
+            {
+              SDL_Surface *space;
+              space = SDL_CreateRGBSurface(0, 20, 20, 32, 0, 0, 0, 0);
+              SDL_FillRect(space, NULL, 0xFFFFFFFF);
+              insert_array(&chars, space);
+            }
+          }
+          else
+          {
+            interCharSpace = spaceEnd - spaceStart;
+          }
+        }
+
         for (; i < img->w; i++)
         {
           if (is_full_column(img, i) == 1)
           {
+            spaceStart = i;
+
             SDL_Surface *result;
 
             result = SDL_CreateRGBSurface(0, i - start, img->h, 32, 0, 0, 0,0);
@@ -107,7 +140,7 @@ Img_array column_image_blocking(Img_array lines)
             break;
           }
         }
-          //break;
+        
       }
     }
   }
@@ -174,7 +207,7 @@ void insert_array(Img_array *a, SDL_Surface *element)
   if (a->used == a->size)
   {
     a->size *= 2;
-    a->array = (SDL_Surface **)realloc(a->array, a->size * sizeof(SDL_Surface *));
+    a->array = (SDL_Surface **)realloc(a->array,a->size*sizeof(SDL_Surface *));
   }
   a->array[a->used++] = element;
 }

@@ -13,4 +13,8 @@ void char_to_matrix(SDL_Surface *chara, char *save);
 
 int make_interface(int argc, char **argv);
 
+GdkPixbuf *create_pixbuf(const gchar *filename);
+
+void file_get(GtkWidget *w, gpointer user_data);
+
 # endif
