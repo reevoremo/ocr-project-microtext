@@ -20,8 +20,8 @@
 #define NUMINPUTS      576 /* number of input units */
 #define NUMHIDDEN      576 /* number of hidden units */
 #define NUMOUTPUTS     89 /* number of output units */
-#define NUMINTRAINSET  89 /* number of values/epochs in the training set */
-#define NUMOFEVALS     89 /* number of values in the test set */
+#define NUMINTRAINSET  267 /* number of values/epochs in the training set */
+#define NUMOFEVALS     267 /* number of values in the test set */
 
 /*
 static float InputVals[NUMINTRAINSET][NUMINPUTS] = {
@@ -85,7 +85,7 @@ int fillArrays(float InputVals[][NUMINPUTS], float TargetVals[][NUMOUTPUTS], flo
               		printf("%d-%d  Num is: %f\n\n",fn,k, InputVals[fn][k]);
       		}
 	
-        	TargetVals[fn][fn]=1.0;		
+        	TargetVals[fn][fn%89]=1.0;		
 	}
 	return 0;
 }
@@ -126,8 +126,8 @@ if(DEBUG){printf("After Array init");}
    config.NumInputs = NUMINPUTS;
    config.NumHidden = NUMHIDDEN;
    config.NumOutputs = NUMOUTPUTS;
-   config.StepSize = 0.5;
-   config.Momentum = 0.5;
+   config.StepSize = 0.04;
+   config.Momentum = 0.04;
    config.Cost = 0.0; 
 
    if(DEBUG){printf("Net Init\n");}
