@@ -23,26 +23,7 @@
 #define NUMINTRAINSET  267 /* number of values/epochs in the training set */
 #define NUMOFEVALS     267 /* number of values in the test set */
 
-/*
-static float InputVals[NUMINTRAINSET][NUMINPUTS] = {
-   { 0.0, 0.0 },
-   { 0.0, 1.0 },
-   { 1.0, 0.0 },
-   { 1.0, 1.0 }
-};
-static float TargetVals[NUMINTRAINSET][NUMOUTPUTS] = {
-   { 0.0 },
-   { 1.0 },
-   { 1.0 },
-   { 0.0 }
-};
-static float TestInputVals[NUMOFEVALS][NUMINPUTS] = {
-   { 0.0, 0.0 },
-   { 0.0, 1.0 },
-   { 1.0, 0.0 },
-   { 1.0, 1.0 }
-};
-*/
+
 
 float LastLearningError;
 float LastRMSError;
@@ -126,8 +107,8 @@ if(DEBUG){printf("After Array init");}
    config.NumInputs = NUMINPUTS;
    config.NumHidden = NUMHIDDEN;
    config.NumOutputs = NUMOUTPUTS;
-   config.StepSize = 0.04;
-   config.Momentum = 0.04;
+   config.StepSize = 0.5;
+   config.Momentum = 0.05;
    config.Cost = 0.0; 
 
    if(DEBUG){printf("Net Init\n");}

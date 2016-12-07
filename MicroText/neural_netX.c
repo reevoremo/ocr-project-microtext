@@ -18,8 +18,8 @@
 
 
 
-#define DYNAMIC_LEARNING 0 
-#define CMDIFFSTEPSIZE 0 
+#define DYNAMIC_LEARNING 1 
+#define CMDIFFSTEPSIZE 1 
 
 
 #ifndef DEBUG
